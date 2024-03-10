@@ -1,21 +1,28 @@
 using CG_Cube.Algebra;
 using CG_Cube.Axes;
 using CG_Cube.Shapes;
+using System.Timers;
 
 namespace CG_Cube
 {
     public partial class Form1 : Form
     {
         // Window dimensions
-        const int WIDTH = 800;
-        const int HEIGHT = 600;
-
+        const int WIDTH = 1920;
+        const int HEIGHT = 1080;
+        readonly Vector2D CENTER = new(WIDTH * 0.5f, HEIGHT * 0.5f);
         // Axes
         readonly AxisX x_axis;
         readonly AxisY y_axis;
 
         // Objects
         readonly Square square;
+        readonly Square square2;
+        Square square3;
+        Square squareCache;
+
+        // Tools
+        System.Timers.Timer timer = new();
 
         public Form1()
         {
@@ -36,9 +43,7 @@ namespace CG_Cube
 
             Matrix2D m1 = Matrix2D.Identity();
             Console.WriteLine(m1); // 1, 0, 0, 1
-            Matrix2D m2 = new Matrix2D(
-                2, 4,
-                -1, 3);
+            Matrix2D m2 = new Matrix2D(2, 4, -1, 3);
             Console.WriteLine(m2);
             Console.WriteLine(m1 + m2); // 3, 4, -1, 4
             Console.WriteLine(m1 - m2); // -1, -4, 1, -2
@@ -46,23 +51,64 @@ namespace CG_Cube
 
             Console.WriteLine(m2 * v3); // 28, 16
 
+            // Timer
+            timer.Interval = 34;
+            timer.Elapsed += Timer_Elapsed!;
+            timer.Start();
+
             // Define axes
             x_axis = new AxisX(200);
             y_axis = new AxisY(200);
 
             // Create objects
             square = new Square(Color.Purple, 100);
+            square2 = new Square(Color.Chartreuse, 100);
+            square3 = new Square(Color.Peru, 100);
+            squareCache = new Square(Color.Peru, 100);
+
+            //// Transformations
+            Scale(2.0f, square2.VertexBuffer);
+            RotateX((float)Math.PI / 4, square2.VertexBuffer);
+
+            //// Change location
             ChangeLocation(WIDTH, HEIGHT, x_axis.VertexBuffer);
             ChangeLocation(WIDTH, HEIGHT, y_axis.VertexBuffer);
             ChangeLocation(WIDTH, HEIGHT, square.VertexBuffer);
+            ChangeLocation(WIDTH, HEIGHT, square2.VertexBuffer);
+            //ChangeLocation(WIDTH, HEIGHT, square3.VertexBuffer);
         }
 
-        private static void ChangeLocation(int width, int height, List<Vector2D> vertexBuffer)
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            foreach (var vertex in vertexBuffer)
+            RotateX(0.1f, squareCache.VertexBuffer);
+            square3.VertexBuffer = new(squareCache.VertexBuffer);
+            Invalidate();
+        }
+
+        private void ChangeLocation(int width, int height, List<Vector2D> vertexBuffer)
+        {
+            for (int i = 0; i < vertexBuffer.Count; i++)
             {
-                vertex.X += width * 0.5f;
-                vertex.Y = height * 0.5f - vertex.Y;
+                vertexBuffer[i].X = vertexBuffer[i].X + CENTER.X;
+                vertexBuffer[i].Y = -vertexBuffer[i].Y + CENTER.Y;
+            }
+        }
+
+        private static void Scale(float scale, List<Vector2D> vertexBuffer)
+        {
+            Matrix2D scaleMatrix = Matrix2D.ScaleMatrix(scale);
+            for (int i = 0; i < vertexBuffer.Count; i++)
+            {
+                vertexBuffer[i] = vertexBuffer[i] * scaleMatrix;
+            }
+        }
+
+        private static void RotateX(float angle, List<Vector2D> vertexBuffer)
+        {
+            Matrix2D rotation = Matrix2D.RotateMatrix(angle);
+            for (int i = 0; i < vertexBuffer.Count; i++)
+            {
+                vertexBuffer[i] = rotation * vertexBuffer[i];
             }
         }
 
@@ -70,18 +116,33 @@ namespace CG_Cube
         {
             base.OnPaint(e);
 
+            //ChangeLocation(WIDTH, HEIGHT, square3.VertexBuffer);
+
             // Draw axes
             x_axis.Draw(e.Graphics, x_axis.VertexBuffer);
             y_axis.Draw(e.Graphics, y_axis.VertexBuffer);
 
             // Draw square
             square.Draw(e.Graphics, square.VertexBuffer);
+            square2.Draw(e.Graphics, square2.VertexBuffer);
+            square3.Draw(e.Graphics, square3.VertexBuffer);
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Escape)
                 Application.Exit();
+
+            if (e.KeyCode == Keys.PageUp)
+                Scale(1.1f, square2.VertexBuffer);
+            if (e.KeyCode == Keys.PageDown)
+                Scale(0.9f, square2.VertexBuffer);
+            if (e.KeyCode == Keys.Left)
+                RotateX((float)Math.PI / 4, square2.VertexBuffer);
+            if (e.KeyCode == Keys.Right)
+                RotateX(-(float)Math.PI / 4, square2.VertexBuffer);
+
+            Invalidate();
         }
     }
 }

@@ -2,7 +2,7 @@
 {
     public class Matrix2D
     {
-        float[,] _matrix = new float[2, 2];
+        private float[,] _matrix = new float[2, 2];
 
         public Matrix2D(float[,] matrix)
         {
@@ -15,6 +15,12 @@
             _matrix[0, 1] = m12;
             _matrix[1, 0] = m21;
             _matrix[1, 1] = m22;
+        }
+
+        public Matrix2D(Vector2D vector)
+        {
+            _matrix[0, 0] = vector.X;
+            _matrix[1, 0] = vector.Y;
         }
 
         public Vector2D ToVector2D()
@@ -119,6 +125,29 @@
                 1, 0,
                 0, 1
             );
+        }
+
+        public static Matrix2D ScaleMatrix(float scale)
+        {
+            return new Matrix2D
+            (
+                scale, 0,
+                0, scale
+            );
+        }
+
+        public static Matrix2D RotateMatrix(float angle)
+        {
+            return new Matrix2D
+            (
+                (float)Math.Cos(angle), (float)-Math.Sin(angle),
+                (float)Math.Sin(angle), (float)Math.Cos(angle)
+            );
+        }
+
+        public override string ToString()
+        {
+            return $"{_matrix[0, 0]}, {_matrix[0, 1]}, {_matrix[1, 0]}, {_matrix[1, 1]}";
         }
     }
 }
