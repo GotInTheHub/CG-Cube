@@ -73,8 +73,16 @@
 
         public static Vector2D operator *(Matrix2D a, Vector2D b)
         {
-            Vector2D transformation = a.ToVector2D();
-            return transformation * b;
+            return new Vector2D
+            (
+                a._matrix[0, 0] * b.X + a._matrix[0, 1] * b.Y,
+                a._matrix[1, 0] * b.X + a._matrix[1, 1] * b.Y
+            );
+        }
+
+        public static Vector2D operator *(Vector2D a, Matrix2D b)
+        {
+            return b * a;
         }
 
         public static Matrix2D operator /(Matrix2D a, float b)
