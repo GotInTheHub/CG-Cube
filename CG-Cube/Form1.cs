@@ -50,7 +50,7 @@ namespace CG_Cube
             Console.WriteLine(m2 * v3); // 28, 16
 
             // Timer
-            timer.Interval = 34;
+            timer.Interval = 100;
             timer.Elapsed += Timer_Elapsed!;
             timer.Start();
 
@@ -73,18 +73,13 @@ namespace CG_Cube
         }
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            //RotateX(0.1f, cube);
-            //square3.VertexBuffer = [];
-            //square3.VertexBuffer = squareCache.ConvertAll(vector => vector.Clone());
-            //ChangeLocation(WIDTH, HEIGHT, square3.VertexBuffer);
-            //Invalidate();
-        }
-
-        private void Timer_Elapsed_Manual(float rotation)
-        {
-            //cube.VertexBuffer= [];
-            //cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
-            //ChangeLocation(WIDTH, HEIGHT, cube.VertexBuffer);
+            RotateX(0.1f, cubeCache);
+            RotateY(0.1f, cubeCache);
+            RotateZ(0.1f, cubeCache);
+            cube.VertexBuffer = [];
+            cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
+            ChangeLocation(WIDTH, HEIGHT, cube.VertexBuffer);
+            Invalidate();
         }
 
         private void ChangeLocation(int width, int height, List<Vector4D> vertexBuffer)
