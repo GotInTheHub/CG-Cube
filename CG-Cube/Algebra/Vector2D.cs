@@ -37,11 +37,6 @@
             return new Vector2D(a.X / b, a.Y / b);
         }
 
-        public static Vector2D operator /(float a, Vector2D b)
-        {
-            return b / a;
-        }
-
         public static Vector2D operator /(Vector2D a, Vector2D b)
         {
             return new Vector2D(a.X / b.X, a.Y / b.Y);

@@ -1,6 +1,6 @@
 using CG_Cube.Algebra;
 using CG_Cube.Axes;
-using CG_Cube.Shapes;
+using MatrixTransformations;
 using System.Timers;
 
 namespace CG_Cube
@@ -16,11 +16,8 @@ namespace CG_Cube
         readonly AxisY y_axis;
 
         // Objects
-        readonly Square square;
-        readonly Square square2;
-        Square square3;
-        List<Vector2D> squareCache;
-        List<Vector2D> squareCache2;
+        readonly Cube cube;
+        List<Vector4D> cubeCache;
 
         // Tools
         System.Timers.Timer timer = new();
@@ -62,42 +59,42 @@ namespace CG_Cube
             y_axis = new AxisY(200);
 
             // Create objects
-            square = new Square(Color.Purple, 100);
-            square2 = new Square(Color.Chartreuse, 100);
-            square3 = new Square(Color.Peru, 100);
-            squareCache = square3.VertexBuffer.ConvertAll(vector => vector.Clone());
-            squareCache2 = square.VertexBuffer.ConvertAll(vector => vector.Clone());
+            cube = new Cube(Color.Red);
+            cubeCache = cube.VertexBuffer.ConvertAll(vector => vector.Clone());
 
-            //// Transformations
-            Scale(2.0f, square2.VertexBuffer);
-            RotateX((float)Math.PI / 4, square2.VertexBuffer);
+            // Transformations
+            Scale(100, cube.VertexBuffer);
+            Scale(100, cubeCache);
 
-            //// Change location
+            // Change location
+            ChangeLocation(WIDTH, HEIGHT, cube.VertexBuffer);
             ChangeLocation(WIDTH, HEIGHT, x_axis.VertexBuffer);
             ChangeLocation(WIDTH, HEIGHT, y_axis.VertexBuffer);
-            ChangeLocation(WIDTH, HEIGHT, square.VertexBuffer);
-            ChangeLocation(WIDTH, HEIGHT, square2.VertexBuffer);
-            ChangeLocation(WIDTH, HEIGHT, square3.VertexBuffer);
         }
-
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            RotateX(0.1f, squareCache);
-            square3.VertexBuffer = [];
-            square3.VertexBuffer = squareCache.ConvertAll(vector => vector.Clone());
-            ChangeLocation(WIDTH, HEIGHT, square3.VertexBuffer);
-            Invalidate();
+            //RotateX(0.1f, cube);
+            //square3.VertexBuffer = [];
+            //square3.VertexBuffer = squareCache.ConvertAll(vector => vector.Clone());
+            //ChangeLocation(WIDTH, HEIGHT, square3.VertexBuffer);
+            //Invalidate();
         }
 
         private void Timer_Elapsed_Manual(float rotation)
         {
-            RotateX(rotation, squareCache2);
-            square.VertexBuffer = [];
-            square.VertexBuffer = squareCache2.ConvertAll(vector => vector.Clone());
-            ChangeLocation(WIDTH, HEIGHT, square.VertexBuffer);
-            Invalidate();
+            //cube.VertexBuffer= [];
+            //cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
+            //ChangeLocation(WIDTH, HEIGHT, cube.VertexBuffer);
         }
 
+        private void ChangeLocation(int width, int height, List<Vector4D> vertexBuffer)
+        {
+            for (int i = 0; i < vertexBuffer.Count; i++)
+            {
+                vertexBuffer[i].X = vertexBuffer[i].X + CENTER.X;
+                vertexBuffer[i].Y = -vertexBuffer[i].Y + CENTER.Y;
+            }
+        }
         private void ChangeLocation(int width, int height, List<Vector2D> vertexBuffer)
         {
             for (int i = 0; i < vertexBuffer.Count; i++)
@@ -107,21 +104,40 @@ namespace CG_Cube
             }
         }
 
-        private static void Scale(float scale, List<Vector2D> vertexBuffer)
+        private static void Scale(float scale, List<Vector4D> vertexBuffer)
         {
-            Matrix2D scaleMatrix = Matrix2D.ScaleMatrix(scale);
+            Matrix scaleMatrix = Matrix.ScaleMatrix(scale);
             for (int i = 0; i < vertexBuffer.Count; i++)
             {
                 vertexBuffer[i] = vertexBuffer[i] * scaleMatrix;
             }
         }
 
-        private static void RotateX(float angle, List<Vector2D> vertexBuffer)
+        private static void RotateX(float angle, List<Vector4D> vertexBuffer)
         {
-            Matrix2D rotation = Matrix2D.RotateMatrix(angle);
+            // vertexBuffer == cubeCache
+            Matrix rotateMatrix = Matrix.RotateX(angle);
             for (int i = 0; i < vertexBuffer.Count; i++)
             {
-                vertexBuffer[i] = rotation * vertexBuffer[i];
+                vertexBuffer[i] = vertexBuffer[i] * rotateMatrix;
+            }
+        }
+
+        private static void RotateY(float angle, List<Vector4D> vertexBuffer)
+        {
+            Matrix rotateMatrix = Matrix.RotateY(angle);
+            for (int i = 0; i < vertexBuffer.Count; i++)
+            {
+                vertexBuffer[i] = vertexBuffer[i] * rotateMatrix;
+            }
+        }
+
+        private static void RotateZ(float angle, List<Vector4D> vertexBuffer)
+        {
+            Matrix rotateMatrix = Matrix.RotateZ(angle);
+            for (int i = 0; i < vertexBuffer.Count; i++)
+            {
+                vertexBuffer[i] = vertexBuffer[i] * rotateMatrix;
             }
         }
 
@@ -133,10 +149,8 @@ namespace CG_Cube
             x_axis.Draw(e.Graphics, x_axis.VertexBuffer);
             y_axis.Draw(e.Graphics, y_axis.VertexBuffer);
 
-            // Draw square
-            square.Draw(e.Graphics, square.VertexBuffer);
-            square2.Draw(e.Graphics, square2.VertexBuffer);
-            square3.Draw(e.Graphics, square3.VertexBuffer);
+            // Draw cube
+            cube.Draw(e.Graphics, cube.VertexBuffer);
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
@@ -145,15 +159,33 @@ namespace CG_Cube
                 Application.Exit();
 
             if (e.KeyCode == Keys.PageUp)
-                Scale(1.1f, square2.VertexBuffer);
+                Scale(1.1f, cube.VertexBuffer);
             if (e.KeyCode == Keys.PageDown)
-                Scale(0.9f, square2.VertexBuffer);
-            if (e.KeyCode == Keys.Left)
-                Timer_Elapsed_Manual(0.1f);
-            if (e.KeyCode == Keys.Right)
-                Timer_Elapsed_Manual(-0.1f);
+                Scale(0.9f, cube.VertexBuffer);
 
-            //Invalidate();
+            if (e.KeyCode == Keys.Q)
+                RotateZ(0.1f, cubeCache); cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
+
+            if (e.KeyCode == Keys.E)
+                RotateZ(-0.1f, cubeCache); cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
+
+            if (e.KeyCode == Keys.A)
+                RotateY(-0.1f, cubeCache); cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
+
+            if (e.KeyCode == Keys.D)
+                RotateY(0.1f, cubeCache); cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
+
+            if (e.KeyCode == Keys.W)
+                RotateX(0.1f, cubeCache); cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
+
+            if (e.KeyCode == Keys.S)
+                RotateX(-0.1f, cubeCache); cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
+
+
+            //cube.VertexBuffer= [];
+            //cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
+            ChangeLocation(WIDTH, HEIGHT, cube.VertexBuffer);
+            Invalidate();
         }
     }
 }
