@@ -16,11 +16,21 @@ namespace CG_Cube
         readonly AxisY y_axis;
 
         // Objects
-        readonly Cube cube;
+        Cube cube;
         List<Vector4D> cubeCache;
 
         // Tools
         System.Timers.Timer timer = new();
+        bool isRotating = false;
+        private Dictionary<Keys, float> rotationAngles = new()
+        {
+            { Keys.Q, 0.0f },
+            { Keys.E, 0.0f },
+            { Keys.A, 0.0f },
+            { Keys.D, 0.0f },
+            { Keys.W, 0.0f },
+            { Keys.S, 0.0f }
+        };
 
         public Form1()
         {
@@ -73,13 +83,16 @@ namespace CG_Cube
         }
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            RotateX(0.1f, cubeCache);
-            RotateY(0.1f, cubeCache);
-            RotateZ(0.1f, cubeCache);
-            cube.VertexBuffer = [];
-            cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
-            ChangeLocation(WIDTH, HEIGHT, cube.VertexBuffer);
-            Invalidate();
+            if (isRotating)
+            {
+                RotateX(0.1f, cubeCache);
+                RotateY(0.1f, cubeCache);
+                RotateZ(0.1f, cubeCache);
+                cube.VertexBuffer = [];
+                cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
+                ChangeLocation(WIDTH, HEIGHT, cube.VertexBuffer);
+                Invalidate();
+            }
         }
 
         private void ChangeLocation(int width, int height, List<Vector4D> vertexBuffer)
@@ -148,6 +161,62 @@ namespace CG_Cube
             cube.Draw(e.Graphics, cube.VertexBuffer);
         }
 
+        private void NormalizeRoationAngles()
+        {
+            foreach (var keyPair in rotationAngles)
+            {
+                float angle = keyPair.Value;
+
+                // Make sure the angle is between 0 and 2 * PI
+                angle %= 2 * MathF.PI;
+
+                // Make sure the angle is positive
+                if (angle < 0)
+                    angle += 2 * MathF.PI;
+
+                // Update the dictionary
+                rotationAngles[keyPair.Key] = angle;
+            }
+        }
+
+        private void UpdateCubeRotation()
+        {
+            foreach (var keyPair in rotationAngles)
+            {
+                float angle = keyPair.Value;
+                Keys key = keyPair.Key;
+
+                if (angle != 0)
+                {
+                    if (key == Keys.Q)
+                        RotateZ(-angle, cubeCache);
+                    if (key == Keys.E)
+                        RotateZ(angle, cubeCache);
+                    if (key == Keys.A)
+                        RotateY(angle, cubeCache);
+                    if (key == Keys.D)
+                        RotateY(-angle, cubeCache);
+                    if (key == Keys.W)
+                        RotateX(-angle, cubeCache);
+                    if (key == Keys.S)
+                        RotateX(angle, cubeCache);
+                }
+            }
+
+            cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
+            ChangeLocation(WIDTH, HEIGHT, cube.VertexBuffer);
+            Invalidate();
+        }
+
+        private void ResetCube()
+        {
+            cube = new Cube(Color.Red);
+            Scale(100, cube.VertexBuffer);
+            cubeCache = cube.VertexBuffer.ConvertAll(vector => vector.Clone());
+            ChangeLocation(WIDTH, HEIGHT, cube.VertexBuffer);
+            rotationAngles = rotationAngles.ToDictionary(pair => pair.Key, pair => 0.0f);
+        }
+
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Escape)
@@ -157,27 +226,29 @@ namespace CG_Cube
                 Scale(1.1f, cube.VertexBuffer);
             if (e.KeyCode == Keys.PageDown)
                 Scale(0.9f, cube.VertexBuffer);
+            if (e.KeyCode == Keys.Home)
+                ResetCube();
 
-            if (e.KeyCode == Keys.Q)
-                RotateZ(0.1f, cubeCache); cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
+            if (e.KeyCode == Keys.CapsLock)
+                isRotating = !isRotating;
 
-            if (e.KeyCode == Keys.E)
-                RotateZ(-0.1f, cubeCache); cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
-
-            if (e.KeyCode == Keys.A)
-                RotateY(-0.1f, cubeCache); cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
-
-            if (e.KeyCode == Keys.D)
-                RotateY(0.1f, cubeCache); cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
-
-            if (e.KeyCode == Keys.W)
-                RotateX(0.1f, cubeCache); cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
-
-            if (e.KeyCode == Keys.S)
-                RotateX(-0.1f, cubeCache); cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
-
-            ChangeLocation(WIDTH, HEIGHT, cube.VertexBuffer);
+            if (rotationAngles.ContainsKey(e.KeyCode))
+            {
+                rotationAngles[e.KeyCode] = 0.1f;
+                NormalizeRoationAngles();
+                UpdateCubeRotation();
+            }
             Invalidate();
+        }
+
+        private void Form1_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (rotationAngles.ContainsKey(e.KeyCode))
+            {
+                rotationAngles[e.KeyCode] = 0.0f;
+                NormalizeRoationAngles();
+                UpdateCubeRotation();
+            }
         }
     }
 }
