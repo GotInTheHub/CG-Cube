@@ -181,9 +181,6 @@ namespace CG_Cube
             if (e.KeyCode == Keys.S)
                 RotateX(-0.1f, cubeCache); cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
 
-
-            //cube.VertexBuffer= [];
-            //cube.VertexBuffer = cubeCache.ConvertAll(vector => vector.Clone());
             ChangeLocation(WIDTH, HEIGHT, cube.VertexBuffer);
             Invalidate();
         }
