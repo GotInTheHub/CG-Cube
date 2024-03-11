@@ -66,5 +66,10 @@
         {
             return a / Magnitude(a);
         }
+
+        public Vector2D Clone()
+        {
+            return new Vector2D(X, Y);
+        }
     }
 }

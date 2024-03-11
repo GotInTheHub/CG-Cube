@@ -19,7 +19,8 @@ namespace CG_Cube
         readonly Square square;
         readonly Square square2;
         Square square3;
-        Square squareCache;
+        List<Vector2D> squareCache;
+        List<Vector2D> squareCache2;
 
         // Tools
         System.Timers.Timer timer = new();
@@ -64,7 +65,8 @@ namespace CG_Cube
             square = new Square(Color.Purple, 100);
             square2 = new Square(Color.Chartreuse, 100);
             square3 = new Square(Color.Peru, 100);
-            squareCache = new Square(Color.Peru, 100);
+            squareCache = square3.VertexBuffer.ConvertAll(vector => vector.Clone());
+            squareCache2 = square.VertexBuffer.ConvertAll(vector => vector.Clone());
 
             //// Transformations
             Scale(2.0f, square2.VertexBuffer);
@@ -75,13 +77,24 @@ namespace CG_Cube
             ChangeLocation(WIDTH, HEIGHT, y_axis.VertexBuffer);
             ChangeLocation(WIDTH, HEIGHT, square.VertexBuffer);
             ChangeLocation(WIDTH, HEIGHT, square2.VertexBuffer);
-            //ChangeLocation(WIDTH, HEIGHT, square3.VertexBuffer);
+            ChangeLocation(WIDTH, HEIGHT, square3.VertexBuffer);
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            RotateX(0.1f, squareCache.VertexBuffer);
-            square3.VertexBuffer = new(squareCache.VertexBuffer);
+            RotateX(0.1f, squareCache);
+            square3.VertexBuffer = [];
+            square3.VertexBuffer = squareCache.ConvertAll(vector => vector.Clone());
+            ChangeLocation(WIDTH, HEIGHT, square3.VertexBuffer);
+            Invalidate();
+        }
+
+        private void Timer_Elapsed_Manual(float rotation)
+        {
+            RotateX(rotation, squareCache2);
+            square.VertexBuffer = [];
+            square.VertexBuffer = squareCache2.ConvertAll(vector => vector.Clone());
+            ChangeLocation(WIDTH, HEIGHT, square.VertexBuffer);
             Invalidate();
         }
 
@@ -116,8 +129,6 @@ namespace CG_Cube
         {
             base.OnPaint(e);
 
-            //ChangeLocation(WIDTH, HEIGHT, square3.VertexBuffer);
-
             // Draw axes
             x_axis.Draw(e.Graphics, x_axis.VertexBuffer);
             y_axis.Draw(e.Graphics, y_axis.VertexBuffer);
@@ -138,11 +149,11 @@ namespace CG_Cube
             if (e.KeyCode == Keys.PageDown)
                 Scale(0.9f, square2.VertexBuffer);
             if (e.KeyCode == Keys.Left)
-                RotateX((float)Math.PI / 4, square2.VertexBuffer);
+                Timer_Elapsed_Manual(0.1f);
             if (e.KeyCode == Keys.Right)
-                RotateX(-(float)Math.PI / 4, square2.VertexBuffer);
+                Timer_Elapsed_Manual(-0.1f);
 
-            Invalidate();
+            //Invalidate();
         }
     }
 }
