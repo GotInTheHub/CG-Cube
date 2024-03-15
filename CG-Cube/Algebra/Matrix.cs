@@ -172,6 +172,12 @@
                 0.0f, 0.0f, 0.0f, 1.0f
             );
         }
+
+        /// <summary>
+        /// Change base so y-axis is correct; Rotate around the x-axis
+        /// </summary>
+        /// <param name="angle">Angle between z-axis</param>
+        /// <returns></returns>
         public static Matrix RotateX(float angle)
         {
             return new Matrix
@@ -182,6 +188,7 @@
                     0.0f, 0.0f, 0.0f, 1.0f
                 );
         }
+
         public static Matrix RotateY(float angle)
         {
             return new Matrix
@@ -193,6 +200,11 @@
                 );
         }
 
+        /// <summary>
+        /// Change base so x-axis is correct; Rotate around z-axis untial the y-axis is towards world space, x-axis if from left-to-rigth
+        /// </summary>
+        /// <param name="angle">Angle between x-axis</param>
+        /// <returns></returns>
         public static Matrix RotateZ(float angle)
         {
             return new Matrix
@@ -202,6 +214,73 @@
                     0.0f, 0.0f, 1.0f, 0.0f,
                     0.0f, 0.0f, 0.0f, 1.0f
                 );
+        }
+
+        /// <summary>
+        /// Translate to camera position
+        /// </summary>
+        /// <param name="r">Length of vector from world view to camera view</param>
+        /// <param name="phi">Angle between z-axis</param>
+        /// <param name="theta">Angle between the x-axis</param>
+        /// <returns></returns>
+        public static Matrix Translate(float r, float phi, float theta)
+        {
+            return new Matrix
+                (
+                    1, 0, 0, r * MathF.Sin(phi) * MathF.Cos(theta),
+                    0, 1, 0, r * MathF.Sin(phi) * MathF.Sin(theta),
+                    0, 0, 1, r * MathF.Cos(phi),
+                    0, 0, 0, 1
+                );
+        }
+
+        public static Matrix TranslateWithXYZ(float x, float y, float z)
+        {
+            return new Matrix
+                (
+                    1.0f, 0.0f, 0.0f, x,
+                    0.0f, 1.0f, 0.0f, y,
+                    0.0f, 0.0f, 1.0f, z,
+                    0.0f, 0.0f, 0.0f, 1.0f
+                );
+        }
+
+        public static Matrix TranslateWithVector(Vector4D vector)
+        {
+            return new Matrix
+                (
+                    1.0f, 0.0f, 0.0f, vector.X,
+                    0.0f, 1.0f, 0.0f, vector.Y,
+                    0.0f, 0.0f, 1.0f, vector.Z,
+                    0.0f, 0.0f, 0.0f, vector.W
+                );
+        }
+
+        public static Matrix TransformationView(float r, float phi, float theta)
+        {
+            return new Matrix
+                (
+                    -MathF.Sin(theta), MathF.Cos(theta), 0.0f, 0.0f,
+                    -MathF.Cos(theta) * MathF.Cos(phi), -MathF.Cos(phi) * MathF.Sin(theta), MathF.Sin(phi), 0.0f,
+                    MathF.Cos(theta) * MathF.Sin(phi), MathF.Sin(theta) * MathF.Sin(phi), MathF.Cos(phi), -r,
+                    0.0f, 0.0f, 0.0f, 1.0f
+                );
+        }
+
+        public static Matrix Projection(float distance, Vector4D vector)
+        {
+            return new Matrix
+                (
+                    -(distance / vector.Z), 0.0f, 0.0f, 0.0f,
+                    0.0f, -(distance / vector.Z), 0.0f, 0.0f,
+                    0.0f, 0.0f, 1.0f, 0.0f,
+                    0.0f, 0.0f, 0.0f, 1.0f
+                );
+        }
+
+        public static float DegreesToRadians(float degrees)
+        {
+            return degrees * (MathF.PI*2 / 360.0f);
         }
     }
 }
