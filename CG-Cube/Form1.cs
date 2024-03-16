@@ -26,10 +26,12 @@ namespace CG_Cube
 
         // Cube Parameters
         List<Vector> projection = [];
+        Vector translation = new();
         float angleX = 0.0f;
         float angleY = 0.0f;
         float angleZ = 0.0f;
         float scale = 1.0f;
+        int phase = 0;
 
         // Objects
         Cube cube;
@@ -160,13 +162,22 @@ namespace CG_Cube
             }
         }
 
-        private static void Translate(Vector vector, List<Vector> vertexBuffer)
+        private void Translate(Vector vector, List<Vector> vertexBuffer)
         {
             Matrix rotationMatrix = Matrix.TranslateWithVector(vector);
             for (int i = 0; i < vertexBuffer.Count; i++)
             {
                 vertexBuffer[i] *= rotationMatrix;
             }
+        }
+
+        private void TranslateAll(Vector vector)
+        {
+            translation += vector;
+            Translate(vector, cube.VertexBuffer);
+            Translate(vector, x_axis.VertexBuffer);
+            Translate(vector, y_axis.VertexBuffer);
+            Translate(vector, z_axis.VertexBuffer);
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -182,19 +193,21 @@ namespace CG_Cube
             // draw info
             Font font = new("Arial", 12, FontStyle.Bold);
             e.Graphics.DrawString("Scale: " + scale, font, Brushes.Black, 0, 0);
-            //trans x
-            //trans y
-            //trans z
-            e.Graphics.DrawString("AngleX: " + angleX, font, Brushes.Black, 0, 100);
-            e.Graphics.DrawString("AngleY: " + angleY, font, Brushes.Black, 0, 120);
-            e.Graphics.DrawString("AngleZ: " + angleZ, font, Brushes.Black, 0, 140);
 
-            e.Graphics.DrawString("R: " + R, font, Brushes.Black, 0, 60);
-            e.Graphics.DrawString("D: " + D, font, Brushes.Black, 0, 0);
-            e.Graphics.DrawString("Phi: " + Phi, font, Brushes.Black, 0, 40);
-            e.Graphics.DrawString("Theta: " + Theta, font, Brushes.Black, 0, 20);
+            e.Graphics.DrawString("TransX: " + translation.X, font, Brushes.Black, 0, 20);
+            e.Graphics.DrawString("TransY: " + translation.Y, font, Brushes.Black, 0, 40);
+            e.Graphics.DrawString("TransZ: " + translation.Z, font, Brushes.Black, 0, 60);
 
-            e.Graphics.DrawString("isRotating: " + isRotating, font, Brushes.Black, 0, 160);
+            e.Graphics.DrawString("AngleX: " + angleX, font, Brushes.Black, 0, 80);
+            e.Graphics.DrawString("AngleY: " + angleY, font, Brushes.Black, 0, 100);
+            e.Graphics.DrawString("AngleZ: " + angleZ, font, Brushes.Black, 0, 120);
+
+            e.Graphics.DrawString("R: " + R, font, Brushes.Black, 0, 140);
+            e.Graphics.DrawString("D: " + D, font, Brushes.Black, 0, 160);
+            e.Graphics.DrawString("Phi: " + Phi, font, Brushes.Black, 0, 180);
+            e.Graphics.DrawString("Theta: " + Theta, font, Brushes.Black, 0, 200);
+
+            e.Graphics.DrawString("isRotating: " + isRotating, font, Brushes.Black, 0, 220);
 
             //phase number
 
@@ -221,87 +234,51 @@ namespace CG_Cube
                 {
                     if (key == Keys.Q)
                     {
-                        Translate(new Vector(0.0f, 0.0f, -10.0f, 1.0f), cube.VertexBuffer);
-                        Translate(new Vector(0.0f, 0.0f, -10.0f, 1.0f), x_axis.VertexBuffer);
-                        Translate(new Vector(0.0f, 0.0f, -10.0f, 1.0f), y_axis.VertexBuffer);
-                        Translate(new Vector(0.0f, 0.0f, -10.0f, 1.0f), z_axis.VertexBuffer);
+                        TranslateAll(new Vector(0.0f, 0.0f, -10.0f, 1.0f));
                     }
                     if (key == Keys.E)
                     {
-                        Translate(new Vector(0.0f, 0.0f, 10.0f, 1.0f), cube.VertexBuffer);
-                        Translate(new Vector(0.0f, 0.0f, 10.0f, 1.0f), x_axis.VertexBuffer);
-                        Translate(new Vector(0.0f, 0.0f, 10.0f, 1.0f), y_axis.VertexBuffer);
-                        Translate(new Vector(0.0f, 0.0f, 10.0f, 1.0f), z_axis.VertexBuffer);
+                        TranslateAll(new Vector(0.0f, 0.0f, 10.0f, 1.0f));
                     }
                     if (key == Keys.A)
                     {
-                        Translate(new Vector(-10.0f, 0.0f, 0.0f, 1.0f), cube.VertexBuffer);
-                        Translate(new Vector(-10.0f, 0.0f, 0.0f, 1.0f), x_axis.VertexBuffer);
-                        Translate(new Vector(-10.0f, 0.0f, 0.0f, 1.0f), y_axis.VertexBuffer);
-                        Translate(new Vector(-10.0f, 0.0f, 0.0f, 1.0f), z_axis.VertexBuffer);
+                        TranslateAll(new Vector(-10.0f, 0.0f, 0.0f, 1.0f));
                     }
                     if (key == Keys.D)
                     {
-                        Translate(new Vector(10.0f, 0.0f, 0.0f, 1.0f), cube.VertexBuffer);
-                        Translate(new Vector(10.0f, 0.0f, 0.0f, 1.0f), x_axis.VertexBuffer);
-                        Translate(new Vector(10.0f, 0.0f, 0.0f, 1.0f), y_axis.VertexBuffer);
-                        Translate(new Vector(10.0f, 0.0f, 0.0f, 1.0f), z_axis.VertexBuffer);
+                        TranslateAll(new Vector(10.0f, 0.0f, 0.0f, 1.0f));
                     }
                     if (key == Keys.W)
                     {
-                        Translate(new Vector(0.0f, 10.0f, 0.0f, 1.0f), cube.VertexBuffer);
-                        Translate(new Vector(0.0f, 10.0f, 0.0f, 1.0f), x_axis.VertexBuffer);
-                        Translate(new Vector(0.0f, 10.0f, 0.0f, 1.0f), y_axis.VertexBuffer);
-                        Translate(new Vector(0.0f, 10.0f, 0.0f, 1.0f), z_axis.VertexBuffer);
+                        TranslateAll(new Vector(0.0f, 10.0f, 0.0f, 1.0f));
                     }
                     if (key == Keys.S)
                     {
-                        Translate(new Vector(0.0f, -10.0f, 0.0f, 1.0f), cube.VertexBuffer);
-                        Translate(new Vector(0.0f, -10.0f, 0.0f, 1.0f), x_axis.VertexBuffer);
-                        Translate(new Vector(0.0f, -10.0f, 0.0f, 1.0f), y_axis.VertexBuffer);
-                        Translate(new Vector(0.0f, -10.0f, 0.0f, 1.0f), z_axis.VertexBuffer);
+                        TranslateAll(new Vector(0.0f, -10.0f, 0.0f, 1.0f));
                     }
                     if (key == Keys.Oemplus)
                     {
                         RotateZ(-angle, cube.VertexBuffer);
-                        //RotateZ(-angle, x_axis.VertexBuffer);
-                        //RotateZ(-angle, y_axis.VertexBuffer);
-                        //RotateZ(-angle, z_axis.VertexBuffer);
                     }
                     if (key == Keys.OemMinus)
                     {
                         RotateZ(angle, cube.VertexBuffer);
-                        //RotateZ(angle, x_axis.VertexBuffer);
-                        //RotateZ(angle, y_axis.VertexBuffer);
-                        //RotateZ(angle, z_axis.VertexBuffer);
                     }
                     if (key == Keys.Left)
                     {
                         RotateY(-angle, cube.VertexBuffer);
-                        //RotateY(-angle, x_axis.VertexBuffer);
-                        //RotateY(-angle, y_axis.VertexBuffer);
-                        //RotateY(-angle, z_axis.VertexBuffer);
                     }
                     if (key == Keys.Right)
                     {
                         RotateY(angle, cube.VertexBuffer);
-                        //RotateY(angle, x_axis.VertexBuffer);
-                        //RotateY(angle, y_axis.VertexBuffer);
-                        //RotateY(angle, z_axis.VertexBuffer);
                     }
                     if (key == Keys.Up)
                     {
                         RotateX(-angle, cube.VertexBuffer);
-                        //RotateX(-angle, x_axis.VertexBuffer);
-                        //RotateX(-angle, y_axis.VertexBuffer);
-                        //RotateX(-angle, z_axis.VertexBuffer);
                     }
                     if (key == Keys.Down)
                     {
                         RotateX(angle, cube.VertexBuffer);
-                        //RotateX(angle, x_axis.VertexBuffer);
-                        //RotateX(angle, y_axis.VertexBuffer);
-                        //RotateX(angle, z_axis.VertexBuffer);
                     }
                     if (key == Keys.PageUp)
                         scale += 0.1f;
