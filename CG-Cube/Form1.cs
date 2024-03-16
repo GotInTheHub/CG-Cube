@@ -95,11 +95,6 @@ namespace CG_Cube
             return result;
         }
 
-        private void Viewport(Graphics graphics)
-        {
-            graphics.TranslateTransform(CENTER.X, CENTER.Y);
-            graphics.ScaleTransform(1, -1, System.Drawing.Drawing2D.MatrixOrder.Append);
-        }
         private List<Vector> Viewport(List<Vector> vertexBuffer)
         {
             List<Vector> result = [];
@@ -162,7 +157,7 @@ namespace CG_Cube
             }
         }
 
-        private void Translate(Vector vector, List<Vector> vertexBuffer)
+        private static void Translate(Vector vector, List<Vector> vertexBuffer)
         {
             Matrix rotationMatrix = Matrix.TranslateWithVector(vector);
             for (int i = 0; i < vertexBuffer.Count; i++)
@@ -186,9 +181,9 @@ namespace CG_Cube
             NormalizeRotationAngles();
 
             //// Draw axes
-            x_axis.Draw(e.Graphics, Viewport(Scale(200 * scale, Projection(RotateCamera(R, Theta, Phi, x_axis.VertexBuffer)))));
-            y_axis.Draw(e.Graphics, Viewport(Scale(200 * scale, Projection(RotateCamera(R, Theta, Phi, y_axis.VertexBuffer)))));
-            z_axis.Draw(e.Graphics, Viewport(Scale(200 * scale, Projection(RotateCamera(R, Theta, Phi, z_axis.VertexBuffer)))));
+            AxisX.Draw(e.Graphics, Viewport(Scale(200 * scale, Projection(RotateCamera(R, Theta, Phi, x_axis.VertexBuffer)))));
+            AxisY.Draw(e.Graphics, Viewport(Scale(200 * scale, Projection(RotateCamera(R, Theta, Phi, y_axis.VertexBuffer)))));
+            AxisZ.Draw(e.Graphics, Viewport(Scale(200 * scale, Projection(RotateCamera(R, Theta, Phi, z_axis.VertexBuffer)))));
 
             // draw info
             Font font = new("Arial", 12, FontStyle.Bold);

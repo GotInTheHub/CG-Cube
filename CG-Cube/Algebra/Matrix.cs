@@ -2,7 +2,7 @@
 {
     public class Matrix
     {
-        private float[,] _matrix = new float[4, 4];
+        private readonly float[,] _matrix = new float[4, 4];
 
         public Matrix()
         {

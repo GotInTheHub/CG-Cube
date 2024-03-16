@@ -19,7 +19,7 @@ namespace CG_Cube.Axes
             ];
         }
 
-        public void Draw(Graphics graphics, List<Vector> vertexBuffer)
+        public static void Draw(Graphics graphics, List<Vector> vertexBuffer)
         {
             Pen pen = new(Color.Red, 2f);
             graphics.DrawLine(pen, vertexBuffer[0].X, vertexBuffer[0].Y, vertexBuffer[1].X, vertexBuffer[1].Y);
