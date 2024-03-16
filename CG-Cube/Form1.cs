@@ -181,15 +181,22 @@ namespace CG_Cube
 
             // draw info
             Font font = new("Arial", 12, FontStyle.Bold);
-            e.Graphics.DrawString("D: " + D, font, Brushes.Black, 0, 0);
-            e.Graphics.DrawString("Theta: " + Theta, font, Brushes.Black, 0, 20);
-            e.Graphics.DrawString("Phi: " + Phi, font, Brushes.Black, 0, 40);
-            e.Graphics.DrawString("R: " + R, font, Brushes.Black, 0, 60);
-            e.Graphics.DrawString("Scale: " + scale, font, Brushes.Black, 0, 80);
+            e.Graphics.DrawString("Scale: " + scale, font, Brushes.Black, 0, 0);
+            //trans x
+            //trans y
+            //trans z
             e.Graphics.DrawString("AngleX: " + angleX, font, Brushes.Black, 0, 100);
             e.Graphics.DrawString("AngleY: " + angleY, font, Brushes.Black, 0, 120);
             e.Graphics.DrawString("AngleZ: " + angleZ, font, Brushes.Black, 0, 140);
+
+            e.Graphics.DrawString("R: " + R, font, Brushes.Black, 0, 60);
+            e.Graphics.DrawString("D: " + D, font, Brushes.Black, 0, 0);
+            e.Graphics.DrawString("Phi: " + Phi, font, Brushes.Black, 0, 40);
+            e.Graphics.DrawString("Theta: " + Theta, font, Brushes.Black, 0, 20);
+
             e.Graphics.DrawString("isRotating: " + isRotating, font, Brushes.Black, 0, 160);
+
+            //phase number
 
             // Draw cube
             projection = Scale(200 * scale, Projection(RotateCamera(R, Theta, Phi, cube.VertexBuffer)));
