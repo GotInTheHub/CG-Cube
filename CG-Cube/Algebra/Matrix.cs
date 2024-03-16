@@ -4,6 +4,16 @@
     {
         private float[,] _matrix = new float[4, 4];
 
+        public Matrix()
+        {
+            _matrix = new float[4, 4]
+            {
+                { 1.0f, 0.0f, 0.0f, 0.0f },
+                { 0.0f, 1.0f, 0.0f, 0.0f },
+                { 0.0f, 0.0f, 1.0f, 0.0f },
+                { 0.0f, 0.0f, 0.0f, 1.0f }
+            };
+        }
         public Matrix(float[,] matrix)
         {
             _matrix = matrix;
@@ -24,7 +34,7 @@
             };
         }
 
-        public Matrix(Vector4D vector)
+        public Matrix(Vector vector)
         {
             _matrix = new float[4, 4]
             {
@@ -35,25 +45,9 @@
             };
         }
 
-        public Matrix(Vector3D vector)
+        public Vector ToVector()
         {
-            _matrix = new float[4, 4]
-            {
-                { 1.0f, 0.0f, 0.0f, vector.X },
-                { 0.0f, 1.0f, 0.0f, vector.Y },
-                { 0.0f, 0.0f, 1.0f, vector.Z },
-                { 0.0f, 0.0f, 0.0f, 1.0f }
-            };
-        }
-
-        public Vector4D ToVector4D()
-        {
-            return new Vector4D(_matrix[0, 3], _matrix[1, 3], _matrix[2, 3], _matrix[3, 3]);
-        }
-
-        public Vector3D ToVector3D()
-        {
-            return new Vector3D(_matrix[0, 3], _matrix[1, 3], _matrix[2, 3]);
+            return new Vector(_matrix[0, 3], _matrix[1, 3], _matrix[2, 3], _matrix[3, 3]);
         }
 
         public static Matrix operator +(Matrix a, Matrix b)
@@ -120,9 +114,9 @@
             );
         }
 
-        public static Vector4D operator *(Matrix a, Vector4D b)
+        public static Vector operator *(Matrix a, Vector b)
         {
-            return new Vector4D
+            return new Vector
             (
                 a._matrix[0, 0] * b.X + a._matrix[0, 1] * b.Y + a._matrix[0, 2] * b.Z + a._matrix[0, 3] * b.W,
                 a._matrix[1, 0] * b.X + a._matrix[1, 1] * b.Y + a._matrix[1, 2] * b.Z + a._matrix[1, 3] * b.W,
@@ -131,7 +125,7 @@
             );
         }
 
-        public static Vector4D operator *(Vector4D a, Matrix b)
+        public static Vector operator *(Vector a, Matrix b)
         {
             return b * a;
         }
@@ -245,7 +239,7 @@
                 );
         }
 
-        public static Matrix TranslateWithVector(Vector4D vector)
+        public static Matrix TranslateWithVector(Vector vector)
         {
             return new Matrix
                 (
@@ -258,6 +252,7 @@
 
         public static Matrix TransformationView(float r, float phi, float theta)
         {
+            // theta z-axis, phi x-axis, r distance to camera
             return new Matrix
                 (
                     -MathF.Sin(theta), MathF.Cos(theta), 0.0f, 0.0f,
@@ -267,20 +262,21 @@
                 );
         }
 
-        public static Matrix Projection(float distance, Vector4D vector)
+        public static Matrix ProjectionMatrix(float distance, Vector vector)
         {
+            distance = 1 / (distance/100 - vector.Z);
             return new Matrix
                 (
-                    -(distance / vector.Z), 0.0f, 0.0f, 0.0f,
-                    0.0f, -(distance / vector.Z), 0.0f, 0.0f,
+                    distance, 0.0f, 0.0f, 0.0f,
+                    0.0f, distance, 0.0f, 0.0f,
                     0.0f, 0.0f, 1.0f, 0.0f,
                     0.0f, 0.0f, 0.0f, 1.0f
                 );
         }
 
-        public static float DegreesToRadians(float degrees)
+        public static float RadiansToDegrees(float radians)
         {
-            return degrees * (MathF.PI*2 / 360.0f);
+            return 180 / MathF.PI * radians;
         }
     }
 }

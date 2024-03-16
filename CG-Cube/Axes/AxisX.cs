@@ -7,19 +7,19 @@ namespace CG_Cube.Axes
     {
         private readonly int _size;
 
-        public List<Vector4D> VertexBuffer;
+        public List<Vector> VertexBuffer;
 
         public AxisX(int size = 100)
         {
             _size = size;
             VertexBuffer =
             [
-                new Vector4D(0, 0, 0),
-                new Vector4D(_size, 0, 0)
+                new Vector(0, 0, 0),
+                new Vector(_size, 0, 0)
             ];
         }
 
-        public void Draw(Graphics graphics, List<Vector4D> vertexBuffer)
+        public void Draw(Graphics graphics, List<Vector> vertexBuffer)
         {
             Pen pen = new(Color.Red, 2f);
             graphics.DrawLine(pen, vertexBuffer[0].X, vertexBuffer[0].Y, vertexBuffer[1].X, vertexBuffer[1].Y);

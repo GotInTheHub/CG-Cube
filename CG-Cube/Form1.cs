@@ -8,19 +8,28 @@ namespace CG_Cube
     public partial class Form1 : Form
     {
         // Window dimensions
-        const int WIDTH = 1920;
-        const int HEIGHT = 1080;
-        readonly Vector4D CENTER = new(WIDTH * 0.5f, HEIGHT * 0.5f, 0.0f);
+        const int WIDTH = 1600;
+        const int HEIGHT = 900;
+        readonly Vector CENTER = new(WIDTH * 0.5f, HEIGHT * 0.5f);
+
         // Axes
         readonly AxisX x_axis;
         readonly AxisY y_axis;
         readonly AxisZ z_axis;
 
-        // Camera Parameters
-        const float D = 800;
-        const float Theta = -100;
-        const float Phi = -10;
+        //// Camera Parameters
+        float D = 800;
+        float Theta = -100;
+        float Phi = -10;
         const float R = 10;
+
+
+        // Cube Parameters
+        List<Vector> projection = [];
+        float angleX = 0.0f;
+        float angleY = 0.0f;
+        float angleZ = 0.0f;
+        float scale = 1.0f;
 
         // Objects
         Cube cube;
@@ -66,97 +75,92 @@ namespace CG_Cube
 
             // Create objects
             cube = new Cube(Color.Red);
-
-            // Scale objects
-            Scale(100, cube.VertexBuffer);
-            Scale(100, x_axis.VertexBuffer);
-            Scale(100, y_axis.VertexBuffer);
-            Scale(100, z_axis.VertexBuffer);
-
-            // Change location
-            Viewport(cube.VertexBuffer);
-            Viewport(x_axis.VertexBuffer);
-            Viewport(y_axis.VertexBuffer);
-            Viewport(z_axis.VertexBuffer);
         }
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             if (isRotating)
             {
-                RotateCamera(0.0f, 0.0f, 0.1f, cube.VertexBuffer);
-                RotateCamera(0.0f, 0.0f, 0.1f, x_axis.VertexBuffer);
-                RotateCamera(0.0f, 0.0f, 0.1f, y_axis.VertexBuffer);
-                RotateCamera(0.0f, 0.0f, 0.1f, z_axis.VertexBuffer);
-
-                Invalidate();
             }
         }
 
-        private static void Project(Vector4D projection, List<Vector4D> vertexBuffer)
+        private List<Vector> Projection(List<Vector> vertexBuffer)
         {
-            Matrix projectionMatrix = Matrix.Projection(0.01f, projection);
-            for (int i = 0; i < vertexBuffer.Count; i++)
+            List<Vector> result = [];
+            foreach (Vector vertex in vertexBuffer)
             {
-                vertexBuffer[i] *= projectionMatrix;
+                result.Add(vertex * Matrix.ProjectionMatrix(D, vertex));
             }
+            return result;
         }
 
-        private List<Vector4D> Viewport(List<Vector4D> vertexBuffer)
+        private void Viewport(Graphics graphics)
         {
-            List<Vector4D> cache = [];
-            for (int i = 0; i < vertexBuffer.Count; i++)
+            graphics.TranslateTransform(CENTER.X, CENTER.Y);
+            graphics.ScaleTransform(1, -1, System.Drawing.Drawing2D.MatrixOrder.Append);
+        }
+        private List<Vector> Viewport(List<Vector> vertexBuffer)
+        {
+            List<Vector> result = [];
+            foreach (Vector vertex in vertexBuffer)
             {
-                cache.Add(new(vertexBuffer[i].X + CENTER.X, CENTER.Y - vertexBuffer[i].Y, vertexBuffer[i].Z + CENTER.Z));
+                result.Add(new(vertex.X + CENTER.X, CENTER.Y - vertex.Y, vertex.Z));
+            }
+            return result;
+        }
+
+        private static List<Vector> Scale(float scale, List<Vector> vertexBuffer)
+        {
+            Matrix scaleMatrix = Matrix.ScaleMatrix(scale);
+            List<Vector> result = [];
+            foreach (Vector vertex in vertexBuffer)
+            {
+                result.Add(vertex * scaleMatrix);
+            }
+            return result;
+        }
+
+        private static List<Vector> RotateCamera(float r, float theta, float phi, List<Vector> vertexBuffer)
+        {
+            Matrix rotateMatrix = Matrix.TransformationView(r, theta, phi);
+            List<Vector> cache = vertexBuffer.ConvertAll(vector => vector.Clone());
+            for (int i = 0; i < cache.Count; i++)
+            {
+                cache[i] = cache[i] * rotateMatrix;
             }
             return cache;
         }
 
-        private static void Scale(float scale, List<Vector4D> vertexBuffer)
+        private void RotateX(float angle, List<Vector> vertexBuffer)
         {
-            Matrix scaleMatrix = Matrix.ScaleMatrix(scale);
-            for (int i = 0; i < vertexBuffer.Count; i++)
-            {
-                vertexBuffer[i] = vertexBuffer[i] * scaleMatrix;
-            }
-        }
-
-        private static void RotateCamera(float r, float theta, float phi, List<Vector4D> vertexBuffer)
-        {
-            Matrix rotationMatrix = Matrix.TransformationView(R + r, Theta + theta, Phi + phi);
-            for (int i = 0; i < vertexBuffer.Count; i++)
-            {
-                vertexBuffer[i] = vertexBuffer[i] * rotationMatrix;
-            }
-        }
-
-        private static void RotateX(float angle, List<Vector4D> vertexBuffer)
-        {
+            angleX += angle;
             Matrix rotateMatrix = Matrix.RotateX(angle);
             for (int i = 0; i < vertexBuffer.Count; i++)
             {
-                vertexBuffer[i] = vertexBuffer[i] * rotateMatrix;
+                vertexBuffer[i] *= rotateMatrix;
             }
         }
 
-        private static void RotateY(float angle, List<Vector4D> vertexBuffer)
+        private void RotateY(float angle, List<Vector> vertexBuffer)
         {
+            angleY += angle;
             Matrix rotateMatrix = Matrix.RotateY(angle);
             for (int i = 0; i < vertexBuffer.Count; i++)
             {
-                vertexBuffer[i] = vertexBuffer[i] * rotateMatrix;
+                vertexBuffer[i] *= rotateMatrix;
             }
         }
 
-        private static void RotateZ(float angle, List<Vector4D> vertexBuffer)
+        private void RotateZ(float angle, List<Vector> vertexBuffer)
         {
+            angleZ += angle;
             Matrix rotateMatrix = Matrix.RotateZ(angle);
             for (int i = 0; i < vertexBuffer.Count; i++)
             {
-                vertexBuffer[i] = vertexBuffer[i] * rotateMatrix;
+                vertexBuffer[i] *= rotateMatrix;
             }
         }
 
-        private static void Translate(Vector4D vector, List<Vector4D> vertexBuffer)
+        private static void Translate(Vector vector, List<Vector> vertexBuffer)
         {
             Matrix rotationMatrix = Matrix.TranslateWithVector(vector);
             for (int i = 0; i < vertexBuffer.Count; i++)
@@ -168,32 +172,35 @@ namespace CG_Cube
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
+            NormalizeRotationAngles();
 
-            // Draw axes
-            x_axis.Draw(e.Graphics, Viewport(x_axis.VertexBuffer));
-            y_axis.Draw(e.Graphics, Viewport(y_axis.VertexBuffer));
-            z_axis.Draw(e.Graphics, Viewport(z_axis.VertexBuffer));
+            //// Draw axes
+            x_axis.Draw(e.Graphics, Viewport(Scale(200 * scale, Projection(RotateCamera(R, Theta, Phi, x_axis.VertexBuffer)))));
+            y_axis.Draw(e.Graphics, Viewport(Scale(200 * scale, Projection(RotateCamera(R, Theta, Phi, y_axis.VertexBuffer)))));
+            z_axis.Draw(e.Graphics, Viewport(Scale(200 * scale, Projection(RotateCamera(R, Theta, Phi, z_axis.VertexBuffer)))));
+
+            // draw info
+            Font font = new("Arial", 12, FontStyle.Bold);
+            e.Graphics.DrawString("D: " + D, font, Brushes.Black, 0, 0);
+            e.Graphics.DrawString("Theta: " + Theta, font, Brushes.Black, 0, 20);
+            e.Graphics.DrawString("Phi: " + Phi, font, Brushes.Black, 0, 40);
+            e.Graphics.DrawString("R: " + R, font, Brushes.Black, 0, 60);
+            e.Graphics.DrawString("Scale: " + scale, font, Brushes.Black, 0, 80);
+            e.Graphics.DrawString("AngleX: " + angleX, font, Brushes.Black, 0, 100);
+            e.Graphics.DrawString("AngleY: " + angleY, font, Brushes.Black, 0, 120);
+            e.Graphics.DrawString("AngleZ: " + angleZ, font, Brushes.Black, 0, 140);
+            e.Graphics.DrawString("isRotating: " + isRotating, font, Brushes.Black, 0, 160);
 
             // Draw cube
-            cube.Draw(e.Graphics, Viewport(cube.VertexBuffer));
+            projection = Scale(200 * scale, Projection(RotateCamera(R, Theta, Phi, cube.VertexBuffer)));
+            cube.Draw(e.Graphics, Viewport(projection));
         }
 
-        private void NormalizeRoationAngles()
+        private void NormalizeRotationAngles()
         {
-            foreach (var keyPair in cubeModifiers)
-            {
-                float angle = keyPair.Value;
-
-                // Make sure the angle is between 0 and 2 * PI
-                angle %= 2 * MathF.PI;
-
-                // Make sure the angle is positive
-                if (angle < 0)
-                    angle += 2 * MathF.PI;
-
-                // Update the dictionary
-                cubeModifiers[keyPair.Key] = angle;
-            }
+            angleX = MathF.Atan2(MathF.Sin(angleX), MathF.Cos(angleX));
+            angleY = MathF.Atan2(MathF.Sin(angleY), MathF.Cos(angleY));
+            angleZ = MathF.Atan2(MathF.Sin(angleZ), MathF.Cos(angleZ));
         }
 
         private void UpdateCube()
@@ -207,109 +214,112 @@ namespace CG_Cube
                 {
                     if (key == Keys.Q)
                     {
-                        Translate(new Vector4D(0.0f, 0.0f, -10.0f, 1.0f), cube.VertexBuffer);
-                        Translate(new Vector4D(0.0f, 0.0f, -10.0f, 1.0f), x_axis.VertexBuffer);
-                        Translate(new Vector4D(0.0f, 0.0f, -10.0f, 1.0f), y_axis.VertexBuffer);
-                        Translate(new Vector4D(0.0f, 0.0f, -10.0f, 1.0f), z_axis.VertexBuffer);
+                        Translate(new Vector(0.0f, 0.0f, -10.0f, 1.0f), cube.VertexBuffer);
+                        Translate(new Vector(0.0f, 0.0f, -10.0f, 1.0f), x_axis.VertexBuffer);
+                        Translate(new Vector(0.0f, 0.0f, -10.0f, 1.0f), y_axis.VertexBuffer);
+                        Translate(new Vector(0.0f, 0.0f, -10.0f, 1.0f), z_axis.VertexBuffer);
                     }
                     if (key == Keys.E)
                     {
-                        Translate(new Vector4D(0.0f, 0.0f, 10.0f, 1.0f), cube.VertexBuffer);
-                        Translate(new Vector4D(0.0f, 0.0f, 10.0f, 1.0f), x_axis.VertexBuffer);
-                        Translate(new Vector4D(0.0f, 0.0f, 10.0f, 1.0f), y_axis.VertexBuffer);
-                        Translate(new Vector4D(0.0f, 0.0f, 10.0f, 1.0f), z_axis.VertexBuffer);
+                        Translate(new Vector(0.0f, 0.0f, 10.0f, 1.0f), cube.VertexBuffer);
+                        Translate(new Vector(0.0f, 0.0f, 10.0f, 1.0f), x_axis.VertexBuffer);
+                        Translate(new Vector(0.0f, 0.0f, 10.0f, 1.0f), y_axis.VertexBuffer);
+                        Translate(new Vector(0.0f, 0.0f, 10.0f, 1.0f), z_axis.VertexBuffer);
                     }
                     if (key == Keys.A)
                     {
-                        Translate(new Vector4D(-10.0f, 0.0f, 0.0f, 1.0f), cube.VertexBuffer);
-                        Translate(new Vector4D(-10.0f, 0.0f, 0.0f, 1.0f), x_axis.VertexBuffer);
-                        Translate(new Vector4D(-10.0f, 0.0f, 0.0f, 1.0f), y_axis.VertexBuffer);
-                        Translate(new Vector4D(-10.0f, 0.0f, 0.0f, 1.0f), z_axis.VertexBuffer);
+                        Translate(new Vector(-10.0f, 0.0f, 0.0f, 1.0f), cube.VertexBuffer);
+                        Translate(new Vector(-10.0f, 0.0f, 0.0f, 1.0f), x_axis.VertexBuffer);
+                        Translate(new Vector(-10.0f, 0.0f, 0.0f, 1.0f), y_axis.VertexBuffer);
+                        Translate(new Vector(-10.0f, 0.0f, 0.0f, 1.0f), z_axis.VertexBuffer);
                     }
                     if (key == Keys.D)
                     {
-                        Translate(new Vector4D(10.0f, 0.0f, 0.0f, 1.0f), cube.VertexBuffer);
-                        Translate(new Vector4D(10.0f, 0.0f, 0.0f, 1.0f), x_axis.VertexBuffer);
-                        Translate(new Vector4D(10.0f, 0.0f, 0.0f, 1.0f), y_axis.VertexBuffer);
-                        Translate(new Vector4D(10.0f, 0.0f, 0.0f, 1.0f), z_axis.VertexBuffer);
+                        Translate(new Vector(10.0f, 0.0f, 0.0f, 1.0f), cube.VertexBuffer);
+                        Translate(new Vector(10.0f, 0.0f, 0.0f, 1.0f), x_axis.VertexBuffer);
+                        Translate(new Vector(10.0f, 0.0f, 0.0f, 1.0f), y_axis.VertexBuffer);
+                        Translate(new Vector(10.0f, 0.0f, 0.0f, 1.0f), z_axis.VertexBuffer);
                     }
                     if (key == Keys.W)
                     {
-                        Translate(new Vector4D(0.0f, 10.0f, 0.0f, 1.0f), cube.VertexBuffer);
-                        Translate(new Vector4D(0.0f, 10.0f, 0.0f, 1.0f), x_axis.VertexBuffer);
-                        Translate(new Vector4D(0.0f, 10.0f, 0.0f, 1.0f), y_axis.VertexBuffer);
-                        Translate(new Vector4D(0.0f, 10.0f, 0.0f, 1.0f), z_axis.VertexBuffer);
+                        Translate(new Vector(0.0f, 10.0f, 0.0f, 1.0f), cube.VertexBuffer);
+                        Translate(new Vector(0.0f, 10.0f, 0.0f, 1.0f), x_axis.VertexBuffer);
+                        Translate(new Vector(0.0f, 10.0f, 0.0f, 1.0f), y_axis.VertexBuffer);
+                        Translate(new Vector(0.0f, 10.0f, 0.0f, 1.0f), z_axis.VertexBuffer);
                     }
                     if (key == Keys.S)
                     {
-                        Translate(new Vector4D(0.0f, -10.0f, 0.0f, 1.0f), cube.VertexBuffer);
-                        Translate(new Vector4D(0.0f, -10.0f, 0.0f, 1.0f), x_axis.VertexBuffer);
-                        Translate(new Vector4D(0.0f, -10.0f, 0.0f, 1.0f), y_axis.VertexBuffer);
-                        Translate(new Vector4D(0.0f, -10.0f, 0.0f, 1.0f), z_axis.VertexBuffer);
+                        Translate(new Vector(0.0f, -10.0f, 0.0f, 1.0f), cube.VertexBuffer);
+                        Translate(new Vector(0.0f, -10.0f, 0.0f, 1.0f), x_axis.VertexBuffer);
+                        Translate(new Vector(0.0f, -10.0f, 0.0f, 1.0f), y_axis.VertexBuffer);
+                        Translate(new Vector(0.0f, -10.0f, 0.0f, 1.0f), z_axis.VertexBuffer);
                     }
                     if (key == Keys.Oemplus)
                     {
                         RotateZ(-angle, cube.VertexBuffer);
-                        RotateZ(-angle, x_axis.VertexBuffer);
-                        RotateZ(-angle, y_axis.VertexBuffer);
-                        RotateZ(-angle, z_axis.VertexBuffer);
+                        //RotateZ(-angle, x_axis.VertexBuffer);
+                        //RotateZ(-angle, y_axis.VertexBuffer);
+                        //RotateZ(-angle, z_axis.VertexBuffer);
                     }
                     if (key == Keys.OemMinus)
                     {
                         RotateZ(angle, cube.VertexBuffer);
-                        RotateZ(angle, x_axis.VertexBuffer);
-                        RotateZ(angle, y_axis.VertexBuffer);
-                        RotateZ(angle, z_axis.VertexBuffer);
+                        //RotateZ(angle, x_axis.VertexBuffer);
+                        //RotateZ(angle, y_axis.VertexBuffer);
+                        //RotateZ(angle, z_axis.VertexBuffer);
                     }
                     if (key == Keys.Left)
                     {
                         RotateY(-angle, cube.VertexBuffer);
-                        RotateY(-angle, x_axis.VertexBuffer);
-                        RotateY(-angle, y_axis.VertexBuffer);
-                        RotateY(-angle, z_axis.VertexBuffer);
+                        //RotateY(-angle, x_axis.VertexBuffer);
+                        //RotateY(-angle, y_axis.VertexBuffer);
+                        //RotateY(-angle, z_axis.VertexBuffer);
                     }
                     if (key == Keys.Right)
                     {
                         RotateY(angle, cube.VertexBuffer);
-                        RotateY(angle, x_axis.VertexBuffer);
-                        RotateY(angle, y_axis.VertexBuffer);
-                        RotateY(angle, z_axis.VertexBuffer);
+                        //RotateY(angle, x_axis.VertexBuffer);
+                        //RotateY(angle, y_axis.VertexBuffer);
+                        //RotateY(angle, z_axis.VertexBuffer);
                     }
                     if (key == Keys.Up)
                     {
                         RotateX(-angle, cube.VertexBuffer);
-                        RotateX(-angle, x_axis.VertexBuffer);
-                        RotateX(-angle, y_axis.VertexBuffer);
-                        RotateX(-angle, z_axis.VertexBuffer);
+                        //RotateX(-angle, x_axis.VertexBuffer);
+                        //RotateX(-angle, y_axis.VertexBuffer);
+                        //RotateX(-angle, z_axis.VertexBuffer);
                     }
                     if (key == Keys.Down)
                     {
                         RotateX(angle, cube.VertexBuffer);
-                        RotateX(angle, x_axis.VertexBuffer);
-                        RotateX(angle, y_axis.VertexBuffer);
-                        RotateX(angle, z_axis.VertexBuffer);
+                        //RotateX(angle, x_axis.VertexBuffer);
+                        //RotateX(angle, y_axis.VertexBuffer);
+                        //RotateX(angle, z_axis.VertexBuffer);
                     }
                     if (key == Keys.PageUp)
-                        Scale(1.1f, cube.VertexBuffer);
+                        scale += 0.1f;
                     if (key == Keys.PageDown)
-                        Scale(0.9f, cube.VertexBuffer);
+                        scale -= 0.1f;
                 }
             }
+            Invalidate();
         }
 
         private void ResetCube()
         {
             isRotating = false;
+            angleX = 0.0f;
+            angleY = 0.0f;
+            angleZ = 0.0f;
+            scale = 1.0f;
+            D = 800;
+            Theta = -100;
+            Phi = -10;
 
-            x_axis.VertexBuffer = (new AxisX(3)).VertexBuffer.ConvertAll(vector => vector.Clone());
-            y_axis.VertexBuffer = (new AxisY(3)).VertexBuffer.ConvertAll(vector => vector.Clone());
+            x_axis.VertexBuffer = new AxisX(3).VertexBuffer.ConvertAll(vector => vector.Clone());
+            y_axis.VertexBuffer = new AxisY(3).VertexBuffer.ConvertAll(vector => vector.Clone());
             z_axis.VertexBuffer = new AxisZ(3).VertexBuffer.ConvertAll(vector => vector.Clone());
             cube = new Cube(Color.Red);
-
-            Scale(100, cube.VertexBuffer);
-            Scale(100, x_axis.VertexBuffer);
-            Scale(100, y_axis.VertexBuffer);
-            Scale(100, z_axis.VertexBuffer);
 
             cubeModifiers = cubeModifiers.ToDictionary(pair => pair.Key, pair => 0.0f);
         }
@@ -325,10 +335,21 @@ namespace CG_Cube
             if (e.KeyCode == Keys.Home)
                 ResetCube();
 
+            if (e.KeyCode == Keys.ShiftKey)
+                D += 10;
+            if (e.KeyCode == Keys.ControlKey)
+                D -= 10;
+            if (e.KeyCode == Keys.Space)
+            {
+                RotateCamera(R, Theta, Phi, cube.VertexBuffer);
+                RotateCamera(R, Theta, Phi, x_axis.VertexBuffer);
+                RotateCamera(R, Theta, Phi, y_axis.VertexBuffer);
+                RotateCamera(R, Theta, Phi, z_axis.VertexBuffer);
+            }
+
             if (cubeModifiers.ContainsKey(e.KeyCode))
             {
                 cubeModifiers[e.KeyCode] = 0.1f;
-                NormalizeRoationAngles();
                 UpdateCube();
             }
             Invalidate();
@@ -339,9 +360,16 @@ namespace CG_Cube
             if (cubeModifiers.ContainsKey(e.KeyCode))
             {
                 cubeModifiers[e.KeyCode] = 0.0f;
-                NormalizeRoationAngles();
                 UpdateCube();
             }
+        }
+
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            UpdateCube();
+            CENTER.X = this.Width * 0.5f;
+            CENTER.Y = this.Height * 0.5f;
+            Invalidate();
         }
     }
 }
