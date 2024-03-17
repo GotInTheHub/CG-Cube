@@ -278,5 +278,10 @@
         {
             return 180 / MathF.PI * radians;
         }
+
+        public static float DegreesToRadians(float degrees)
+        {
+            return MathF.PI / 180 * degrees;
+        }
     }
 }
