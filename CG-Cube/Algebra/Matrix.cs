@@ -1,4 +1,6 @@
-﻿namespace CG_Cube.Algebra
+﻿using System.Numerics;
+
+namespace CG_Cube.Algebra
 {
     public class Matrix
     {
@@ -253,13 +255,77 @@
         public static Matrix TransformationView(float r, float phi, float theta)
         {
             // theta z-axis, phi x-axis, r distance to camera
+            r = DegreesToRadians(r);
+            phi = DegreesToRadians(phi);
+            theta = DegreesToRadians(theta+90);
+            //return new Matrix
+            //    (
+            //        -MathF.Sin(theta), MathF.Cos(theta), 0.0f, 0.0f,
+            //        -MathF.Cos(theta) * MathF.Cos(phi), -MathF.Cos(phi) * MathF.Sin(theta), MathF.Sin(phi), 0.0f,
+            //        MathF.Cos(theta) * MathF.Sin(phi), MathF.Sin(theta) * MathF.Sin(phi), MathF.Cos(phi), -r,
+            //        0.0f, 0.0f, 0.0f, 1.0f
+            //    );
+            Matrix rx = RotateX(phi);
+            Matrix rz = RotateZ(theta);
+            Matrix t = Translate(r, phi, theta);
+            Matrix4x4 Rx = ToMatrix4x4(rx);
+            Matrix4x4 Rz = ToMatrix4x4(rz);
+            Matrix4x4 T = ToMatrix4x4(t);
+            Rx = InverseMatrix(Rx);
+            Rz = InverseMatrix(Rz);
+            T = InverseMatrix(T);
+            Matrix4x4 result = Rx * Rz * T;
+            return ToMatrix(result);
+
+
+            //return new Matrix
+            //(
+            //    inverse.M11, inverse.M12, inverse.M13, inverse.M14,
+            //    inverse.M21, inverse.M22, inverse.M23, inverse.M24,
+            //    inverse.M31, inverse.M32, inverse.M33, inverse.M34,
+            //    inverse.M41, inverse.M42, inverse.M43, inverse.M44
+            //);
+        }
+
+        public static Matrix4x4 ToMatrix4x4(Matrix m)
+        {
+            return new Matrix4x4
+            {
+                M11 = m._matrix[0, 0],
+                M12 = m._matrix[0, 1],
+                M13 = m._matrix[0, 2],
+                M14 = m._matrix[0, 3],
+                M21 = m._matrix[1, 0],
+                M22 = m._matrix[1, 1],
+                M23 = m._matrix[1, 2],
+                M24 = m._matrix[1, 3],
+                M31 = m._matrix[2, 0],
+                M32 = m._matrix[2, 1],
+                M33 = m._matrix[2, 2],
+                M34 = m._matrix[2, 3],
+                M41 = m._matrix[3, 0],
+                M42 = m._matrix[3, 1],
+                M43 = m._matrix[3, 2],
+                M44 = m._matrix[3, 3]
+            };
+        }
+
+        public static Matrix ToMatrix(Matrix4x4 m)
+        {
             return new Matrix
-                (
-                    -MathF.Sin(theta), MathF.Cos(theta), 0.0f, 0.0f,
-                    -MathF.Cos(theta) * MathF.Cos(phi), -MathF.Cos(phi) * MathF.Sin(theta), MathF.Sin(phi), 0.0f,
-                    MathF.Cos(theta) * MathF.Sin(phi), MathF.Sin(theta) * MathF.Sin(phi), MathF.Cos(phi), -r,
-                    0.0f, 0.0f, 0.0f, 1.0f
-                );
+            (
+                m.M11, m.M12, m.M13, m.M14,
+                m.M21, m.M22, m.M23, m.M24,
+                m.M31, m.M32, m.M33, m.M34,
+                m.M41, m.M42, m.M43, m.M44
+            );
+        }
+
+        public static Matrix4x4 InverseMatrix(Matrix4x4 matrix)
+        {
+            Matrix4x4 inverse = new();
+            Matrix4x4.Invert(matrix, out inverse);
+            return inverse;
         }
 
         public static Matrix ProjectionMatrix(float distance, Vector vector)
