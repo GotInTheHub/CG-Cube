@@ -21,8 +21,14 @@ namespace CG_Cube
         float D = 800;
         float Theta = -100;
         float Phi = -10;
-        const float R = 10;
+        float R = 10;
+        const float startD = 800;
+        const float startTheta = -100;
+        const float startPhi = -10;
+        const float startR = 10;
 
+        // Animation variables
+        bool AnimationForward = true;
 
         // Cube Parameters
         List<Vector> projection = [];
@@ -31,7 +37,7 @@ namespace CG_Cube
         float angleY = 0.0f;
         float angleZ = 0.0f;
         float scale = 1.0f;
-        int phase = 0;
+        int phase = 1;
 
         // Objects
         Cube cube;
@@ -41,20 +47,24 @@ namespace CG_Cube
         bool isRotating = false;
         private Dictionary<Keys, float> cubeModifiers = new()
         {
-            { Keys.Q, 0.0f },
-            { Keys.E, 0.0f },
-            { Keys.A, 0.0f },
-            { Keys.D, 0.0f },
-            { Keys.W, 0.0f },
+            { Keys.X, 0.0f },
+            { Keys.Y, 0.0f },
+            { Keys.Z, 0.0f },
             { Keys.S, 0.0f },
-            {Keys.Left, 0.0f },
-            {Keys.Right, 0.0f },
-            {Keys.Up, 0.0f },
-            {Keys.Down, 0.0f },
-            {Keys.OemMinus, 0.0f },
-            {Keys.Oemplus, 0.0f },
-            {Keys.PageUp, 0.0f },
-            {Keys.PageDown, 0.0f },
+            { Keys.Left, 0.0f },
+            { Keys.Right, 0.0f },
+            { Keys.Up, 0.0f },
+            { Keys.Down, 0.0f },
+            { Keys.PageUp, 0.0f },
+            { Keys.PageDown, 0.0f },
+        };
+
+        private Dictionary<Keys, float> cameraModifiers = new()
+        {
+            { Keys.T, 0.0f },
+            { Keys.P, 0.0f },
+            { Keys.R, 0.0f },
+            { Keys.D, 0.0f }
         };
 
         public Form1()
@@ -66,7 +76,7 @@ namespace CG_Cube
             this.DoubleBuffered = true;
 
             // Timer
-            timer.Interval = 333;
+            timer.Interval = 50;
             timer.Elapsed += Timer_Elapsed!;
             timer.Start();
 
@@ -82,6 +92,92 @@ namespace CG_Cube
         {
             if (isRotating)
             {
+                if (phase == 1)
+                {
+                    Theta -= 1.0f;
+                    if (scale >= 1.5f)
+                    {
+                        AnimationForward = false;
+                    }
+                    if (AnimationForward)
+                    {
+                        scale += 0.01f;
+                    }
+                    else
+                    {
+                        scale -= 0.01f;
+                    }
+                    if (scale <= 1.0f)
+                    {
+                        phase = 2;
+                        AnimationForward = true;
+                    }
+                }
+                if (phase == 2)
+                {
+                    Theta -= 1.0f;
+                    if (angleX >= Matrix.DegreesToRadians(45))
+                    {
+                        AnimationForward = false;
+                    }
+                    if (AnimationForward)
+                    {
+                        RotateX(Matrix.DegreesToRadians(1), cube.VertexBuffer);
+                    }
+                    else
+                    {
+                        RotateX(-Matrix.DegreesToRadians(1), cube.VertexBuffer);
+                    }
+                    if (angleX <= 0.0f)
+                    {
+                        AnimationForward = true;
+                        phase = 3;
+                    }
+                }
+                if (phase == 3)
+                {
+                    Phi += 1.0f;
+                    if (angleY >= Matrix.DegreesToRadians(45))
+                    {
+                        AnimationForward = false;
+                    }
+                    if (AnimationForward)
+                    {
+                        RotateY(Matrix.DegreesToRadians(1), cube.VertexBuffer);
+                    }
+                    else
+                    {
+                        RotateY(-Matrix.DegreesToRadians(1), cube.VertexBuffer);
+                    }
+                    if (angleY <= 0.0f)
+                    {
+                        AnimationForward = true;
+                        phase = 4;
+                    }
+                }
+                if (phase == 4)
+                {
+                    if (Theta != startTheta)
+                    {
+                        if (Theta < startTheta)
+                            Theta += 1.0f;
+                        else
+                            Theta -= 1.0f;
+                    }
+                    if (Phi != startPhi)
+                    {
+                        if (Phi < startPhi)
+                            Phi += 1.0f;
+                        else
+                            Phi -= 1.0f;
+                    }
+                    else if (Phi == startPhi && Theta == startTheta)
+                    {
+                        phase = 1;
+                    }
+                }
+
+                Invalidate();
             }
         }
 
@@ -187,24 +283,24 @@ namespace CG_Cube
 
             // draw info
             Font font = new("Arial", 12, FontStyle.Bold);
-            e.Graphics.DrawString("Scale: " + scale, font, Brushes.Black, 0, 0);
+            e.Graphics.DrawString("Scale: " + MathF.Round(scale, 2), font, Brushes.Black, 0, 0);
 
-            e.Graphics.DrawString("TransX: " + translation.X, font, Brushes.Black, 0, 20);
-            e.Graphics.DrawString("TransY: " + translation.Y, font, Brushes.Black, 0, 40);
-            e.Graphics.DrawString("TransZ: " + translation.Z, font, Brushes.Black, 0, 60);
+            e.Graphics.DrawString("TransX: " + MathF.Round(translation.X, 1), font, Brushes.Black, 0, 20);
+            e.Graphics.DrawString("TransY: " + MathF.Round(translation.Y, 1), font, Brushes.Black, 0, 40);
+            e.Graphics.DrawString("TransZ: " + MathF.Round(translation.Z, 1), font, Brushes.Black, 0, 60);
 
-            e.Graphics.DrawString("AngleX: " + angleX, font, Brushes.Black, 0, 80);
-            e.Graphics.DrawString("AngleY: " + angleY, font, Brushes.Black, 0, 100);
-            e.Graphics.DrawString("AngleZ: " + angleZ, font, Brushes.Black, 0, 120);
+            e.Graphics.DrawString("RotX: " + MathF.Round(Matrix.RadiansToDegrees(angleX), 0), font, Brushes.Black, 0, 80);
+            e.Graphics.DrawString("RotY: " + MathF.Round(Matrix.RadiansToDegrees(angleY), 0), font, Brushes.Black, 0, 100);
+            e.Graphics.DrawString("RotZ: " + MathF.Round(Matrix.RadiansToDegrees(angleZ), 0), font, Brushes.Black, 0, 120);
 
-            e.Graphics.DrawString("R: " + R, font, Brushes.Black, 0, 140);
-            e.Graphics.DrawString("D: " + D, font, Brushes.Black, 0, 160);
-            e.Graphics.DrawString("Phi: " + Phi, font, Brushes.Black, 0, 180);
-            e.Graphics.DrawString("Theta: " + Theta, font, Brushes.Black, 0, 200);
+            e.Graphics.DrawString("R: " + MathF.Round(R, 1), font, Brushes.Black, 0, 160);
+            e.Graphics.DrawString("D: " + D, font, Brushes.Black, 0, 180);
+            e.Graphics.DrawString("Phi: " + MathF.Round(Phi, 1), font, Brushes.Black, 0, 200);
+            e.Graphics.DrawString("Theta: " + MathF.Round(Theta, 1), font, Brushes.Black, 0, 220);
 
-            e.Graphics.DrawString("isRotating: " + isRotating, font, Brushes.Black, 0, 220);
+            e.Graphics.DrawString("isRotating: " + isRotating, font, Brushes.Black, 0, 240);
 
-            //phase number
+            e.Graphics.DrawString("Phase: " + phase, font, Brushes.Black, 0, 280);
 
             // Draw cube
             projection = Scale(200 * scale, Projection(RotateCamera(R, Theta, Phi, cube.VertexBuffer)));
@@ -218,7 +314,7 @@ namespace CG_Cube
             angleZ = MathF.Atan2(MathF.Sin(angleZ), MathF.Cos(angleZ));
         }
 
-        private void UpdateCube()
+        private void UpdateCube(KeyEventArgs e)
         {
             foreach (var keyPair in cubeModifiers)
             {
@@ -227,61 +323,110 @@ namespace CG_Cube
 
                 if (angle != 0)
                 {
-                    if (key == Keys.Q)
+                    if (key == Keys.PageDown)
                     {
-                        TranslateAll(new Vector(0.0f, 0.0f, -10.0f, 1.0f));
+                        TranslateAll(new Vector(0.0f, 0.0f, -angle, 1.0f));
                     }
-                    if (key == Keys.E)
+                    if (key == Keys.PageUp)
                     {
-                        TranslateAll(new Vector(0.0f, 0.0f, 10.0f, 1.0f));
-                    }
-                    if (key == Keys.A)
-                    {
-                        TranslateAll(new Vector(-10.0f, 0.0f, 0.0f, 1.0f));
-                    }
-                    if (key == Keys.D)
-                    {
-                        TranslateAll(new Vector(10.0f, 0.0f, 0.0f, 1.0f));
-                    }
-                    if (key == Keys.W)
-                    {
-                        TranslateAll(new Vector(0.0f, 10.0f, 0.0f, 1.0f));
-                    }
-                    if (key == Keys.S)
-                    {
-                        TranslateAll(new Vector(0.0f, -10.0f, 0.0f, 1.0f));
-                    }
-                    if (key == Keys.Oemplus)
-                    {
-                        RotateZ(-angle, cube.VertexBuffer);
-                    }
-                    if (key == Keys.OemMinus)
-                    {
-                        RotateZ(angle, cube.VertexBuffer);
+                        TranslateAll(new Vector(0.0f, 0.0f, angle, 1.0f));
                     }
                     if (key == Keys.Left)
                     {
-                        RotateY(-angle, cube.VertexBuffer);
+                        TranslateAll(new Vector(-angle, 0.0f, 0.0f, 1.0f));
                     }
                     if (key == Keys.Right)
                     {
-                        RotateY(angle, cube.VertexBuffer);
+                        TranslateAll(new Vector(angle, 0.0f, 0.0f, 1.0f));
                     }
                     if (key == Keys.Up)
                     {
-                        RotateX(-angle, cube.VertexBuffer);
+                        TranslateAll(new Vector(0.0f, angle, 0.0f, 1.0f));
                     }
                     if (key == Keys.Down)
                     {
-                        RotateX(angle, cube.VertexBuffer);
+                        TranslateAll(new Vector(0.0f, -angle, 0.0f, 1.0f));
                     }
-                    if (key == Keys.PageUp)
-                        scale += 0.1f;
-                    if (key == Keys.PageDown)
-                        scale -= 0.1f;
+                    if (key == Keys.Z && e.Modifiers == Keys.Shift)
+                    {
+                        RotateZ(-angle*10, cube.VertexBuffer);
+                    }
+                    if (key == Keys.Z && e.Modifiers != Keys.Shift)
+                    {
+                        RotateZ(angle*10, cube.VertexBuffer);
+                    }
+                    if (key == Keys.Y && e.Modifiers == Keys.Shift)
+                    {
+                        RotateY(-angle*10, cube.VertexBuffer);
+                    }
+                    if (key == Keys.Y && e.Modifiers != Keys.Shift)
+                    {
+                        RotateY(angle*10, cube.VertexBuffer);
+                    }
+                    if (key == Keys.X && e.Modifiers == Keys.Shift)
+                    {
+                        RotateX(-angle*10, cube.VertexBuffer);
+                    }
+                    if (key == Keys.X && e.Modifiers != Keys.Shift)
+                    {
+                        RotateX(angle*10, cube.VertexBuffer);
+                    }
+                    if (key == Keys.S && e.Modifiers == Keys.Shift)
+                    {
+                        scale += angle;
+                    }
+                    if (key == Keys.S && e.Modifiers != Keys.Shift)
+                    {
+                        scale -= angle;
+                    }
                 }
             }
             Invalidate();
+        }
+
+        private void UpdateCamera(KeyEventArgs e)
+        {
+            foreach (var keyPair in cameraModifiers)
+            {
+                float angle = keyPair.Value;
+                Keys key = keyPair.Key;
+
+                if (angle != 0)
+                {
+                    if (key == Keys.R && e.Modifiers == Keys.Shift)
+                    {
+                        R += angle;
+                    }
+                    if (key == Keys.R && e.Modifiers != Keys.Shift)
+                    {
+                        R -= angle;
+                    }
+                    if (key == Keys.D && e.Modifiers == Keys.Shift)
+                    {
+                        D += 10;
+                    }
+                    if (key == Keys.D && e.Modifiers != Keys.Shift)
+                    {
+                        D-= 10;
+                    }
+                    if (key == Keys.T && e.Modifiers == Keys.Shift)
+                    {
+                        Theta += 10;
+                    }
+                    if (key == Keys.T && e.Modifiers != Keys.Shift)
+                    {
+                        Theta -= 10;
+                    }
+                    if (key == Keys.P && e.Modifiers == Keys.Shift)
+                    {
+                        Phi += 10;
+                    }
+                    if (key == Keys.P && e.Modifiers != Keys.Shift)
+                    {
+                        Phi -= 10;
+                    }
+                }
+            }
         }
 
         private void ResetCube()
@@ -290,10 +435,11 @@ namespace CG_Cube
             angleX = 0.0f;
             angleY = 0.0f;
             angleZ = 0.0f;
+            translation = new();
             scale = 1.0f;
-            D = 800;
-            Theta = -100;
-            Phi = -10;
+            D = startD;
+            Theta = startTheta;
+            Phi = startPhi;
 
             x_axis.VertexBuffer = new AxisX(3).VertexBuffer.ConvertAll(vector => vector.Clone());
             y_axis.VertexBuffer = new AxisY(3).VertexBuffer.ConvertAll(vector => vector.Clone());
@@ -308,16 +454,12 @@ namespace CG_Cube
             if (e.KeyCode == Keys.Escape)
                 Application.Exit();
 
-            if (e.KeyCode == Keys.CapsLock)
+            if (e.KeyCode == Keys.A && e.Modifiers == Keys.Shift)
                 isRotating = !isRotating;
 
-            if (e.KeyCode == Keys.Home)
+            if (e.KeyCode == Keys.C && e.Modifiers == Keys.Shift)
                 ResetCube();
 
-            if (e.KeyCode == Keys.ShiftKey)
-                D += 10;
-            if (e.KeyCode == Keys.ControlKey)
-                D -= 10;
             if (e.KeyCode == Keys.Space)
             {
                 RotateCamera(R, Theta, Phi, cube.VertexBuffer);
@@ -329,7 +471,12 @@ namespace CG_Cube
             if (cubeModifiers.ContainsKey(e.KeyCode))
             {
                 cubeModifiers[e.KeyCode] = 0.1f;
-                UpdateCube();
+                UpdateCube(e);
+            }
+            if (cameraModifiers.ContainsKey(e.KeyCode))
+            {
+                cameraModifiers[e.KeyCode] = 1.0f;
+                UpdateCamera(e);
             }
             Invalidate();
         }
@@ -339,13 +486,17 @@ namespace CG_Cube
             if (cubeModifiers.ContainsKey(e.KeyCode))
             {
                 cubeModifiers[e.KeyCode] = 0.0f;
-                UpdateCube();
+                UpdateCube(e);
+            }
+            if (cameraModifiers.ContainsKey(e.KeyCode))
+            {
+                cameraModifiers[e.KeyCode] = 0.0f;
+                UpdateCamera(e);
             }
         }
 
         private void Form1_Resize(object sender, EventArgs e)
         {
-            UpdateCube();
             CENTER.X = this.Width * 0.5f;
             CENTER.Y = this.Height * 0.5f;
             Invalidate();
