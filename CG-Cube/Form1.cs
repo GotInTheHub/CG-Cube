@@ -286,35 +286,43 @@ namespace CG_Cube
 
             // draw info
             Font font = new("Arial", 12, FontStyle.Bold);
+
             e.Graphics.DrawString("Scale: " + MathF.Round(scale, 2), font, Brushes.Black, 0, 0);
             e.Graphics.DrawString("s/S", font, Brushes.Black, fromEdge, 0);
 
-
             e.Graphics.DrawString("TransX: " + MathF.Round(translation.X, 1), font, Brushes.Black, 0, 20);
             e.Graphics.DrawString("Left/Right", font, Brushes.Black, fromEdge, 20);
+
             e.Graphics.DrawString("TransY: " + MathF.Round(translation.Y, 1), font, Brushes.Black, 0, 40);
             e.Graphics.DrawString("Up/Down", font, Brushes.Black, fromEdge, 40);
+
             e.Graphics.DrawString("TransZ: " + MathF.Round(translation.Z, 1), font, Brushes.Black, 0, 60);
             e.Graphics.DrawString("PgUp/PgDown", font, Brushes.Black, fromEdge, 60);
 
-
             e.Graphics.DrawString("RotX: " + MathF.Round(Matrix.RadiansToDegrees(angleX), 0), font, Brushes.Black, 0, 80);
             e.Graphics.DrawString("x/X", font, Brushes.Black, fromEdge, 80);
+
             e.Graphics.DrawString("RotY: " + MathF.Round(Matrix.RadiansToDegrees(angleY), 0), font, Brushes.Black, 0, 100);
             e.Graphics.DrawString("y/Y", font, Brushes.Black, fromEdge, 100);
+
             e.Graphics.DrawString("RotZ: " + MathF.Round(Matrix.RadiansToDegrees(angleZ), 0), font, Brushes.Black, 0, 120);
             e.Graphics.DrawString("z/Z", font, Brushes.Black, fromEdge, 120);
 
             e.Graphics.DrawString("R: " + MathF.Round(R, 1), font, Brushes.Black, 0, 160);
             e.Graphics.DrawString("r/R", font, Brushes.Black, fromEdge, 160);
-            e.Graphics.DrawString("D: " + D + "\t\t\t d/D", font, Brushes.Black, 0, 180);
+
+            e.Graphics.DrawString("D: " + D, font, Brushes.Black, 0, 180);
+            e.Graphics.DrawString("d/D", font, Brushes.Black, fromEdge, 180);
+
             e.Graphics.DrawString("Phi: " + MathF.Round(Phi, 1), font, Brushes.Black, 0, 200);
             e.Graphics.DrawString("p/P", font, Brushes.Black, fromEdge, 200);
+
             e.Graphics.DrawString("Theta: " + MathF.Round(Theta, 1), font, Brushes.Black, 0, 220);
             e.Graphics.DrawString("t/T", font, Brushes.Black, fromEdge, 220);
 
             e.Graphics.DrawString("isRotating: " + isRotating, font, Brushes.Black, 0, 240);
             e.Graphics.DrawString("A", font, Brushes.Black, fromEdge, 240);
+
             e.Graphics.DrawString("Phase: " + phase, font, Brushes.Black, 0, 280);
 
             // Draw cube
