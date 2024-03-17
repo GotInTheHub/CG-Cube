@@ -44,15 +44,6 @@
             return new Vector(a.X / b, a.Y / b, a.Z / b);
         }
 
-        public static Vector3D operator /(Vector a, Vector b)
-        {
-            if (a.W == 0 || b.W == 0)
-                throw new ArgumentException("W cannot be 0");
-
-            return new Vector3D(a.X / a.W, a.Y / a.W, a.Z / a.W)
-                   / new Vector3D(b.X / b.W, b.Y / b.W, b.Z / b.W);
-        }
-
         public static float Dot(Vector a, Vector b)
         {
             return a.X * b.X + a.Y * b.Y + a.Z * b.Z + a.W * b.W;
@@ -77,15 +68,6 @@
         {
             return a / Magnitude(a);
         }
-
-        public static Vector3D ToCartesian(Vector a)
-        {
-            if (a.W == 0)
-                throw new ArgumentException("W cannot be 0");
-
-            return new Vector3D(a.X / a.W, a.Y / a.W, a.Z / a.W);
-        }
-
         public override string ToString()
         {
             return $"({X}, {Y}, {Z}, {W})";

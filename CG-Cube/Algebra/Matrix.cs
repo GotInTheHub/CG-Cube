@@ -2,11 +2,11 @@
 {
     public class Matrix
     {
-        private readonly float[,] _matrix = new float[4, 4];
+        public readonly float[,] matrix = new float[4, 4];
 
         public Matrix()
         {
-            _matrix = new float[4, 4]
+            matrix = new float[4, 4]
             {
                 { 1.0f, 0.0f, 0.0f, 0.0f },
                 { 0.0f, 1.0f, 0.0f, 0.0f },
@@ -16,7 +16,7 @@
         }
         public Matrix(float[,] matrix)
         {
-            _matrix = matrix;
+            this.matrix = matrix;
         }
 
         public Matrix(
@@ -25,7 +25,7 @@
             float m31, float m32, float m33, float m34,
             float m41, float m42, float m43, float m44)
         {
-            _matrix = new float[4, 4]
+            matrix = new float[4, 4]
             {
                 { m11, m12, m13, m14 },
                 { m21, m22, m23, m24 },
@@ -36,7 +36,7 @@
 
         public Matrix(Vector vector)
         {
-            _matrix = new float[4, 4]
+            matrix = new float[4, 4]
             {
                 { 1.0f, 0.0f, 0.0f, vector.X },
                 { 0.0f, 1.0f, 0.0f, vector.Y },
@@ -47,17 +47,17 @@
 
         public Vector ToVector()
         {
-            return new Vector(_matrix[0, 3], _matrix[1, 3], _matrix[2, 3], _matrix[3, 3]);
+            return new Vector(matrix[0, 3], matrix[1, 3], matrix[2, 3], matrix[3, 3]);
         }
 
         public static Matrix operator +(Matrix a, Matrix b)
         {
             return new Matrix
             (
-                a._matrix[0, 0] + b._matrix[0, 0], a._matrix[0, 1] + b._matrix[0, 1], a._matrix[0, 2] + b._matrix[0, 2], a._matrix[0, 3] + b._matrix[0, 3],
-                a._matrix[1, 0] + b._matrix[1, 0], a._matrix[1, 1] + b._matrix[1, 1], a._matrix[1, 2] + b._matrix[1, 2], a._matrix[1, 3] + b._matrix[1, 3],
-                a._matrix[2, 0] + b._matrix[2, 0], a._matrix[2, 1] + b._matrix[2, 1], a._matrix[2, 2] + b._matrix[2, 2], a._matrix[2, 3] + b._matrix[2, 3],
-                a._matrix[3, 0] + b._matrix[3, 0], a._matrix[3, 1] + b._matrix[3, 1], a._matrix[3, 2] + b._matrix[3, 2], a._matrix[3, 3] + b._matrix[3, 3]
+                a.matrix[0, 0] + b.matrix[0, 0], a.matrix[0, 1] + b.matrix[0, 1], a.matrix[0, 2] + b.matrix[0, 2], a.matrix[0, 3] + b.matrix[0, 3],
+                a.matrix[1, 0] + b.matrix[1, 0], a.matrix[1, 1] + b.matrix[1, 1], a.matrix[1, 2] + b.matrix[1, 2], a.matrix[1, 3] + b.matrix[1, 3],
+                a.matrix[2, 0] + b.matrix[2, 0], a.matrix[2, 1] + b.matrix[2, 1], a.matrix[2, 2] + b.matrix[2, 2], a.matrix[2, 3] + b.matrix[2, 3],
+                a.matrix[3, 0] + b.matrix[3, 0], a.matrix[3, 1] + b.matrix[3, 1], a.matrix[3, 2] + b.matrix[3, 2], a.matrix[3, 3] + b.matrix[3, 3]
             );
         }
 
@@ -65,10 +65,10 @@
         {
             return new Matrix
             (
-                a._matrix[0, 0] - b._matrix[0, 0], a._matrix[0, 1] - b._matrix[0, 1], a._matrix[0, 2] - b._matrix[0, 2], a._matrix[0, 3] - b._matrix[0, 3],
-                a._matrix[1, 0] - b._matrix[1, 0], a._matrix[1, 1] - b._matrix[1, 1], a._matrix[1, 2] - b._matrix[1, 2], a._matrix[1, 3] - b._matrix[1, 3],
-                a._matrix[2, 0] - b._matrix[2, 0], a._matrix[2, 1] - b._matrix[2, 1], a._matrix[2, 2] - b._matrix[2, 2], a._matrix[2, 3] - b._matrix[2, 3],
-                a._matrix[3, 0] - b._matrix[3, 0], a._matrix[3, 1] - b._matrix[3, 1], a._matrix[3, 2] - b._matrix[3, 2], a._matrix[3, 3] - b._matrix[3, 3]
+                a.matrix[0, 0] - b.matrix[0, 0], a.matrix[0, 1] - b.matrix[0, 1], a.matrix[0, 2] - b.matrix[0, 2], a.matrix[0, 3] - b.matrix[0, 3],
+                a.matrix[1, 0] - b.matrix[1, 0], a.matrix[1, 1] - b.matrix[1, 1], a.matrix[1, 2] - b.matrix[1, 2], a.matrix[1, 3] - b.matrix[1, 3],
+                a.matrix[2, 0] - b.matrix[2, 0], a.matrix[2, 1] - b.matrix[2, 1], a.matrix[2, 2] - b.matrix[2, 2], a.matrix[2, 3] - b.matrix[2, 3],
+                a.matrix[3, 0] - b.matrix[3, 0], a.matrix[3, 1] - b.matrix[3, 1], a.matrix[3, 2] - b.matrix[3, 2], a.matrix[3, 3] - b.matrix[3, 3]
             );
         }
 
@@ -76,10 +76,10 @@
         {
             return new Matrix
             (
-                a._matrix[0, 0] * b, a._matrix[0, 1] * b, a._matrix[0, 2] * b, a._matrix[0, 3] * b,
-                a._matrix[1, 0] * b, a._matrix[1, 1] * b, a._matrix[1, 2] * b, a._matrix[1, 3] * b,
-                a._matrix[2, 0] * b, a._matrix[2, 1] * b, a._matrix[2, 2] * b, a._matrix[2, 3] * b,
-                a._matrix[3, 0] * b, a._matrix[3, 1] * b, a._matrix[3, 2] * b, a._matrix[3, 3] * b
+                a.matrix[0, 0] * b, a.matrix[0, 1] * b, a.matrix[0, 2] * b, a.matrix[0, 3] * b,
+                a.matrix[1, 0] * b, a.matrix[1, 1] * b, a.matrix[1, 2] * b, a.matrix[1, 3] * b,
+                a.matrix[2, 0] * b, a.matrix[2, 1] * b, a.matrix[2, 2] * b, a.matrix[2, 3] * b,
+                a.matrix[3, 0] * b, a.matrix[3, 1] * b, a.matrix[3, 2] * b, a.matrix[3, 3] * b
             );
         }
 
@@ -92,25 +92,25 @@
         {
             return new Matrix
             (
-                a._matrix[0, 0] * b._matrix[0, 0] + a._matrix[0, 1] * b._matrix[1, 0] + a._matrix[0, 2] * b._matrix[2, 0] + a._matrix[0, 3] * b._matrix[3, 0],
-                a._matrix[0, 0] * b._matrix[0, 1] + a._matrix[0, 1] * b._matrix[1, 1] + a._matrix[0, 2] * b._matrix[2, 1] + a._matrix[0, 3] * b._matrix[3, 1],
-                a._matrix[0, 0] * b._matrix[0, 2] + a._matrix[0, 1] * b._matrix[1, 2] + a._matrix[0, 2] * b._matrix[2, 2] + a._matrix[0, 3] * b._matrix[3, 2],
-                a._matrix[0, 0] * b._matrix[0, 3] + a._matrix[0, 1] * b._matrix[1, 3] + a._matrix[0, 2] * b._matrix[2, 3] + a._matrix[0, 3] * b._matrix[3, 3],
+                a.matrix[0, 0] * b.matrix[0, 0] + a.matrix[0, 1] * b.matrix[1, 0] + a.matrix[0, 2] * b.matrix[2, 0] + a.matrix[0, 3] * b.matrix[3, 0],
+                a.matrix[0, 0] * b.matrix[0, 1] + a.matrix[0, 1] * b.matrix[1, 1] + a.matrix[0, 2] * b.matrix[2, 1] + a.matrix[0, 3] * b.matrix[3, 1],
+                a.matrix[0, 0] * b.matrix[0, 2] + a.matrix[0, 1] * b.matrix[1, 2] + a.matrix[0, 2] * b.matrix[2, 2] + a.matrix[0, 3] * b.matrix[3, 2],
+                a.matrix[0, 0] * b.matrix[0, 3] + a.matrix[0, 1] * b.matrix[1, 3] + a.matrix[0, 2] * b.matrix[2, 3] + a.matrix[0, 3] * b.matrix[3, 3],
 
-                a._matrix[1, 0] * b._matrix[0, 0] + a._matrix[1, 1] * b._matrix[1, 0] + a._matrix[1, 2] * b._matrix[2, 0] + a._matrix[1, 3] * b._matrix[3, 0],
-                a._matrix[1, 0] * b._matrix[0, 1] + a._matrix[1, 1] * b._matrix[1, 1] + a._matrix[1, 2] * b._matrix[2, 1] + a._matrix[1, 3] * b._matrix[3, 1],
-                a._matrix[1, 0] * b._matrix[0, 2] + a._matrix[1, 1] * b._matrix[1, 2] + a._matrix[1, 2] * b._matrix[2, 2] + a._matrix[1, 3] * b._matrix[3, 2],
-                a._matrix[1, 0] * b._matrix[0, 3] + a._matrix[1, 1] * b._matrix[1, 3] + a._matrix[1, 2] * b._matrix[2, 3] + a._matrix[1, 3] * b._matrix[3, 3],
+                a.matrix[1, 0] * b.matrix[0, 0] + a.matrix[1, 1] * b.matrix[1, 0] + a.matrix[1, 2] * b.matrix[2, 0] + a.matrix[1, 3] * b.matrix[3, 0],
+                a.matrix[1, 0] * b.matrix[0, 1] + a.matrix[1, 1] * b.matrix[1, 1] + a.matrix[1, 2] * b.matrix[2, 1] + a.matrix[1, 3] * b.matrix[3, 1],
+                a.matrix[1, 0] * b.matrix[0, 2] + a.matrix[1, 1] * b.matrix[1, 2] + a.matrix[1, 2] * b.matrix[2, 2] + a.matrix[1, 3] * b.matrix[3, 2],
+                a.matrix[1, 0] * b.matrix[0, 3] + a.matrix[1, 1] * b.matrix[1, 3] + a.matrix[1, 2] * b.matrix[2, 3] + a.matrix[1, 3] * b.matrix[3, 3],
 
-                a._matrix[2, 0] * b._matrix[0, 0] + a._matrix[2, 1] * b._matrix[1, 0] + a._matrix[2, 2] * b._matrix[2, 0] + a._matrix[2, 3] * b._matrix[3, 0],
-                a._matrix[2, 0] * b._matrix[0, 1] + a._matrix[2, 1] * b._matrix[1, 1] + a._matrix[2, 2] * b._matrix[2, 1] + a._matrix[2, 3] * b._matrix[3, 1],
-                a._matrix[2, 0] * b._matrix[0, 2] + a._matrix[2, 1] * b._matrix[1, 2] + a._matrix[2, 2] * b._matrix[2, 2] + a._matrix[2, 3] * b._matrix[3, 2],
-                a._matrix[2, 0] * b._matrix[0, 3] + a._matrix[2, 1] * b._matrix[1, 3] + a._matrix[2, 2] * b._matrix[2, 3] + a._matrix[2, 3] * b._matrix[3, 3],
+                a.matrix[2, 0] * b.matrix[0, 0] + a.matrix[2, 1] * b.matrix[1, 0] + a.matrix[2, 2] * b.matrix[2, 0] + a.matrix[2, 3] * b.matrix[3, 0],
+                a.matrix[2, 0] * b.matrix[0, 1] + a.matrix[2, 1] * b.matrix[1, 1] + a.matrix[2, 2] * b.matrix[2, 1] + a.matrix[2, 3] * b.matrix[3, 1],
+                a.matrix[2, 0] * b.matrix[0, 2] + a.matrix[2, 1] * b.matrix[1, 2] + a.matrix[2, 2] * b.matrix[2, 2] + a.matrix[2, 3] * b.matrix[3, 2],
+                a.matrix[2, 0] * b.matrix[0, 3] + a.matrix[2, 1] * b.matrix[1, 3] + a.matrix[2, 2] * b.matrix[2, 3] + a.matrix[2, 3] * b.matrix[3, 3],
 
-                a._matrix[3, 0] * b._matrix[0, 0] + a._matrix[3, 1] * b._matrix[1, 0] + a._matrix[3, 2] * b._matrix[2, 0] + a._matrix[3, 3] * b._matrix[3, 0],
-                a._matrix[3, 0] * b._matrix[0, 1] + a._matrix[3, 1] * b._matrix[1, 1] + a._matrix[3, 2] * b._matrix[2, 1] + a._matrix[3, 3] * b._matrix[3, 1],
-                a._matrix[3, 0] * b._matrix[0, 2] + a._matrix[3, 1] * b._matrix[1, 2] + a._matrix[3, 2] * b._matrix[2, 2] + a._matrix[3, 3] * b._matrix[3, 2],
-                a._matrix[3, 0] * b._matrix[0, 3] + a._matrix[3, 1] * b._matrix[1, 3] + a._matrix[3, 2] * b._matrix[2, 3] + a._matrix[3, 3] * b._matrix[3, 3]
+                a.matrix[3, 0] * b.matrix[0, 0] + a.matrix[3, 1] * b.matrix[1, 0] + a.matrix[3, 2] * b.matrix[2, 0] + a.matrix[3, 3] * b.matrix[3, 0],
+                a.matrix[3, 0] * b.matrix[0, 1] + a.matrix[3, 1] * b.matrix[1, 1] + a.matrix[3, 2] * b.matrix[2, 1] + a.matrix[3, 3] * b.matrix[3, 1],
+                a.matrix[3, 0] * b.matrix[0, 2] + a.matrix[3, 1] * b.matrix[1, 2] + a.matrix[3, 2] * b.matrix[2, 2] + a.matrix[3, 3] * b.matrix[3, 2],
+                a.matrix[3, 0] * b.matrix[0, 3] + a.matrix[3, 1] * b.matrix[1, 3] + a.matrix[3, 2] * b.matrix[2, 3] + a.matrix[3, 3] * b.matrix[3, 3]
             );
         }
 
@@ -118,29 +118,14 @@
         {
             return new Vector
             (
-                a._matrix[0, 0] * b.X + a._matrix[0, 1] * b.Y + a._matrix[0, 2] * b.Z + a._matrix[0, 3] * b.W,
-                a._matrix[1, 0] * b.X + a._matrix[1, 1] * b.Y + a._matrix[1, 2] * b.Z + a._matrix[1, 3] * b.W,
-                a._matrix[2, 0] * b.X + a._matrix[2, 1] * b.Y + a._matrix[2, 2] * b.Z + a._matrix[2, 3] * b.W,
-                a._matrix[3, 0] * b.X + a._matrix[3, 1] * b.Y + a._matrix[3, 2] * b.Z + a._matrix[3, 3] * b.W
+                a.matrix[0, 0] * b.X + a.matrix[0, 1] * b.Y + a.matrix[0, 2] * b.Z + a.matrix[0, 3] * b.W,
+                a.matrix[1, 0] * b.X + a.matrix[1, 1] * b.Y + a.matrix[1, 2] * b.Z + a.matrix[1, 3] * b.W,
+                a.matrix[2, 0] * b.X + a.matrix[2, 1] * b.Y + a.matrix[2, 2] * b.Z + a.matrix[2, 3] * b.W,
+                a.matrix[3, 0] * b.X + a.matrix[3, 1] * b.Y + a.matrix[3, 2] * b.Z + a.matrix[3, 3] * b.W
             );
         }
 
         public static Vector operator *(Vector a, Matrix b)
-        {
-            return b * a;
-        }
-
-        public static Vector3D operator *(Matrix a, Vector3D b)
-        {
-            return new Vector3D
-            (
-                a._matrix[0, 0] * b.X + a._matrix[0, 1] * b.Y + a._matrix[0, 2] * b.Z + a._matrix[0, 3],
-                a._matrix[1, 0] * b.X + a._matrix[1, 1] * b.Y + a._matrix[1, 2] * b.Z + a._matrix[1, 3],
-                a._matrix[2, 0] * b.X + a._matrix[2, 1] * b.Y + a._matrix[2, 2] * b.Z + a._matrix[2, 3]
-            );
-        }
-
-        public static Vector3D operator *(Vector3D a, Matrix b)
         {
             return b * a;
         }
