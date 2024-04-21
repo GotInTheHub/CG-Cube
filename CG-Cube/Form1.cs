@@ -326,6 +326,7 @@ namespace CG_Cube
             e.Graphics.DrawString("Phase: " + phase, font, Brushes.Black, 0, 280);
 
             // Draw cube
+            // model transformation (translation -> rotation -> scale)  -> projection transformation -> viewport
             projection = Scale(scale, Projection(RotateCamera(R, Theta, Phi, cube.VertexBuffer)));
             cube.Draw(e.Graphics, Viewport(projection));
         }
