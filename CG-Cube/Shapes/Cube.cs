@@ -1,8 +1,9 @@
 ﻿using CG_Cube.Algebra;
+using CG_Cube.Shapes;
 
 namespace MatrixTransformations
 {
-    public class Cube(Color c)
+    public class Cube : Shape
     {
 
         //          7----------4
@@ -14,33 +15,33 @@ namespace MatrixTransformations
         //      |/         |/                  z
         //      2----------1
 
-        private const int size = 1;
-        public List<Vector> VertexBuffer =
-        [
-            new Vector( 1.0f,  1.0f, 1.0f),     //0
-            new Vector( 1.0f, -1.0f, 1.0f),     //1
-            new Vector(-1.0f, -1.0f, 1.0f),     //2
-            new Vector(-1.0f,  1.0f, 1.0f),     //3
+        public Cube(Color color, int size = 1) : base(color, size)
+        {
+            VertexBuffer =
+            [
+                new Vector( 1.0f,  1.0f, 1.0f) * size,     //0
+                new Vector( 1.0f, -1.0f, 1.0f) * size,     //1
+                new Vector(-1.0f, -1.0f, 1.0f) * size,     //2
+                new Vector(-1.0f,  1.0f, 1.0f) * size,     //3
 
-            new Vector( 1.0f,  1.0f, -1.0f),    //4
-            new Vector( 1.0f, -1.0f, -1.0f),    //5
-            new Vector(-1.0f, -1.0f, -1.0f),    //6
-            new Vector(-1.0f,  1.0f, -1.0f),    //7
+                new Vector( 1.0f,  1.0f, -1.0f) * size,    //4
+                new Vector( 1.0f, -1.0f, -1.0f) * size,    //5
+                new Vector(-1.0f, -1.0f, -1.0f) * size,    //6
+                new Vector(-1.0f,  1.0f, -1.0f) * size,    //7
 
-            new Vector( 1.2f,  1.2f, 1.2f),     //0
-            new Vector( 1.2f, -1.2f, 1.2f),     //1
-            new Vector(-1.2f, -1.2f, 1.2f),     //2
-            new Vector(-1.2f,  1.2f, 1.2f),     //3
+                new Vector( 1.2f,  1.2f, 1.2f) * size,     //0
+                new Vector( 1.2f, -1.2f, 1.2f) * size,     //1
+                new Vector(-1.2f, -1.2f, 1.2f) * size,     //2
+                new Vector(-1.2f,  1.2f, 1.2f) * size,     //3
 
-            new Vector( 1.2f,  1.2f, -1.2f),    //4
-            new Vector( 1.2f, -1.2f, -1.2f),    //5
-            new Vector(-1.2f, -1.2f, -1.2f),    //6
-            new Vector(-1.2f,  1.2f, -1.2f)     //7
-        ];
+                new Vector( 1.2f,  1.2f, -1.2f) * size,    //4
+                new Vector( 1.2f, -1.2f, -1.2f) * size,    //5
+                new Vector(-1.2f, -1.2f, -1.2f) * size,    //6
+                new Vector(-1.2f,  1.2f, -1.2f) * size     //7
+            ];
+        }
 
-        private readonly Color color = c;
-
-        public void Draw(Graphics g, List<Vector> vb)
+        public override void Draw(Graphics g, List<Vector> vb)
         {
             Pen pen = new(color, 2f);
             Brush brush = new SolidBrush(Color.Black);

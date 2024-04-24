@@ -2,15 +2,10 @@
 
 namespace CG_Cube.Axes
 {
-    public class AxisY
+    public class AxisY : Axis
     {
-        private readonly int _size;
-
-        public List<Vector> VertexBuffer;
-
-        public AxisY(int size = 100)
+        public AxisY(Color color, int size = 100) : base(color, size)
         {
-            _size = size;
             VertexBuffer =
             [
                 new Vector(0, 0, 0),
@@ -18,10 +13,9 @@ namespace CG_Cube.Axes
             ];
         }
 
-        public static void Draw(Graphics graphics, List<Vector> vertexBuffer)
+        public override void Draw(Graphics graphics, List<Vector> vertexBuffer)
         {
-            Pen pen = new(Color.Green, 2f);
-            graphics.DrawLine(pen, vertexBuffer[0].X, vertexBuffer[0].Y, vertexBuffer[1].X, vertexBuffer[1].Y);
+            base.Draw(graphics, vertexBuffer);
 
             Font font = new("Arial", 10);
             PointF point = new(vertexBuffer[1].X, vertexBuffer[1].Y);

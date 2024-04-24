@@ -185,7 +185,18 @@
                 );
         }
 
-        public static Matrix TranslateWithVector(Vector vector)
+        public static Matrix Rotate(Vector v)
+        {
+            return new Matrix
+                (
+                    (float)Math.Cos(v.Z) * (float)Math.Cos(v.Y), (float)-Math.Sin(v.Z), (float)Math.Cos(v.Y), 0.0f,
+                    (float)Math.Sin(v.Z), (float)Math.Cos(v.Z) * (float)Math.Cos(v.X), (float)-Math.Sin(v.X), 0.0f,
+                    (float)-Math.Sin(v.Y), (float)Math.Sin(v.X), (float)Math.Cos(v.Y) * (float)Math.Cos(v.X), 0.0f,
+                    0.0f, 0.0f, 0.0f, 1.0f
+                );
+        }
+
+        public static Matrix Translate(Vector vector)
         {
             return new Matrix
                 (
@@ -196,7 +207,7 @@
                 );
         }
 
-        public static Matrix TransformationView(float r, float theta, float phi)
+        public static Matrix Transformation(float r, float theta, float phi)
         {
             phi = DegreesToRadians(phi);
             theta = DegreesToRadians(theta);
@@ -219,6 +230,23 @@
                     0.0f, 0.0f, 1.0f, 0.0f,
                     0.0f, 0.0f, 0.0f, 1.0f
                 );
+        }
+
+        public Vector Spherical(float r, float theta, float phi)
+        {
+            Vector v = new Vector();
+
+            float snt = MathF.Sin(theta * MathF.PI / 180);
+            float cnt = MathF.Cos(theta * MathF.PI / 180);
+            float snp = MathF.Sin(phi * MathF.PI / 180);
+            float cnp = MathF.Cos(phi * MathF.PI / 180);
+
+            v.X = r * snt * cnp;
+            v.Y = r * cnt;
+            v.Z = -r * snt * snp;
+            v.W = 1;
+
+            return v;
         }
 
         public static float RadiansToDegrees(float radians)

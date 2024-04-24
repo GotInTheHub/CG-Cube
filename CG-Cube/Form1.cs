@@ -1,5 +1,6 @@
 using CG_Cube.Algebra;
 using CG_Cube.Axes;
+using CG_Cube.Shapes;
 using MatrixTransformations;
 using System.Timers;
 
@@ -13,9 +14,7 @@ namespace CG_Cube
         readonly Vector CENTER = new(WIDTH * 0.5f, HEIGHT * 0.5f);
 
         // Axes
-        readonly AxisX x_axis;
-        readonly AxisY y_axis;
-        readonly AxisZ z_axis;
+        readonly Axis x_axis, y_axis, z_axis;
 
         // Camera Parameters
         float D = 800;
@@ -41,7 +40,7 @@ namespace CG_Cube
         int phase = 1;
 
         // Objects
-        Cube cube;
+        Shape cube;
 
         // Tools
         readonly System.Timers.Timer timer = new();
@@ -82,12 +81,14 @@ namespace CG_Cube
             timer.Start();
 
             // Define axes
-            x_axis = new AxisX(3);
-            y_axis = new AxisY(3);
-            z_axis = new AxisZ(3);
+            x_axis = new AxisX(Color.Red, 3);
+            y_axis = new AxisY(Color.Green, 3);
+            z_axis = new AxisZ(Color.Blue, 3);
 
             // Create objects
-            cube = new Cube(Color.Red);
+            cube = new Cube(Color.Red, 1);
+
+            DrawText(new(this.CreateGraphics(), this.ClientRectangle));
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -216,8 +217,8 @@ namespace CG_Cube
 
         private static List<Vector> RotateCamera(float r, float theta, float phi, List<Vector> vertexBuffer)
         {
-            Matrix rotateMatrix = Matrix.TransformationView(r, theta, phi);
-            List<Vector> cache = vertexBuffer.ConvertAll(vector => vector.Clone());
+            Matrix rotateMatrix = Matrix.Transformation(r, theta, phi);
+            List<Vector> cache = new(vertexBuffer);
             for (int i = 0; i < cache.Count; i++)
             {
                 cache[i] = cache[i] * rotateMatrix;
@@ -257,76 +258,72 @@ namespace CG_Cube
 
         private static void Translate(Vector vector, List<Vector> vertexBuffer)
         {
-            Matrix rotationMatrix = Matrix.TranslateWithVector(vector);
+            Matrix rotationMatrix = Matrix.Translate(vector);
             for (int i = 0; i < vertexBuffer.Count; i++)
             {
                 vertexBuffer[i] *= rotationMatrix;
             }
         }
 
-        private void TranslateAll(Vector vector)
+        private void TranslateCube(Vector vector)
         {
             translation += vector;
             Translate(vector, cube.VertexBuffer);
-            Translate(vector, x_axis.VertexBuffer);
-            Translate(vector, y_axis.VertexBuffer);
-            Translate(vector, z_axis.VertexBuffer);
+        }
+
+        private static void DrawText(PaintEventArgs e)
+        {
+            Font font = new("Arial", 12, FontStyle.Bold);
+            int fromEdge = 170;
+
+            e.Graphics.DrawString("s/S", font, Brushes.Black, fromEdge, 0);
+            e.Graphics.DrawString("Left/Right", font, Brushes.Black, fromEdge, 20);
+            e.Graphics.DrawString("Up/Down", font, Brushes.Black, fromEdge, 40);
+            e.Graphics.DrawString("PgUp/PgDown", font, Brushes.Black, fromEdge, 60);
+            e.Graphics.DrawString("x/X", font, Brushes.Black, fromEdge, 80);
+            e.Graphics.DrawString("y/Y", font, Brushes.Black, fromEdge, 100);
+            e.Graphics.DrawString("z/Z", font, Brushes.Black, fromEdge, 120);
+            e.Graphics.DrawString("r/R", font, Brushes.Black, fromEdge, 160);
+            e.Graphics.DrawString("d/D", font, Brushes.Black, fromEdge, 180);
+            e.Graphics.DrawString("p/P", font, Brushes.Black, fromEdge, 200);
+            e.Graphics.DrawString("t/T", font, Brushes.Black, fromEdge, 220);
+            e.Graphics.DrawString("A", font, Brushes.Black, fromEdge, 240);
+
+        }
+
+        private void UpdateOnScreenValues(PaintEventArgs e)
+        {
+            Font font = new("Arial", 12, FontStyle.Bold);
+
+            e.Graphics.DrawString("Scale: " + MathF.Round(scale, 2), font, Brushes.Black, 0, 0);
+            e.Graphics.DrawString("TransX: " + MathF.Round(translation.X, 1), font, Brushes.Black, 0, 20);
+            e.Graphics.DrawString("TransY: " + MathF.Round(translation.Y, 1), font, Brushes.Black, 0, 40);
+            e.Graphics.DrawString("TransZ: " + MathF.Round(translation.Z, 1), font, Brushes.Black, 0, 60);
+            e.Graphics.DrawString("RotX: " + MathF.Round(Matrix.RadiansToDegrees(angleX), 0), font, Brushes.Black, 0, 80);
+            e.Graphics.DrawString("RotY: " + MathF.Round(Matrix.RadiansToDegrees(angleY), 0), font, Brushes.Black, 0, 100);
+            e.Graphics.DrawString("RotZ: " + MathF.Round(Matrix.RadiansToDegrees(angleZ), 0), font, Brushes.Black, 0, 120);
+            e.Graphics.DrawString("R: " + MathF.Round(R, 1), font, Brushes.Black, 0, 160);
+            e.Graphics.DrawString("D: " + D, font, Brushes.Black, 0, 180);
+            e.Graphics.DrawString("Phi: " + MathF.Round(Phi, 1), font, Brushes.Black, 0, 200);
+            e.Graphics.DrawString("Theta: " + MathF.Round(Theta, 1), font, Brushes.Black, 0, 220);
+            e.Graphics.DrawString("isRotating: " + isRotating, font, Brushes.Black, 0, 240);
+            e.Graphics.DrawString("Phase: " + phase, font, Brushes.Black, 0, 280);
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            int fromEdge = 170;
             base.OnPaint(e);
             NormalizeRotationAngles();
 
-            // Draw axes
-            AxisX.Draw(e.Graphics, Viewport(Scale(scale, Projection(RotateCamera(R, Theta, Phi, x_axis.VertexBuffer)))));
-            AxisY.Draw(e.Graphics, Viewport(Scale(scale, Projection(RotateCamera(R, Theta, Phi, y_axis.VertexBuffer)))));
-            AxisZ.Draw(e.Graphics, Viewport(Scale(scale, Projection(RotateCamera(R, Theta, Phi, z_axis.VertexBuffer)))));
-
             // draw info
-            Font font = new("Arial", 12, FontStyle.Bold);
+            UpdateOnScreenValues(e);
 
-            e.Graphics.DrawString("Scale: " + MathF.Round(scale, 2), font, Brushes.Black, 0, 0);
-            e.Graphics.DrawString("s/S", font, Brushes.Black, fromEdge, 0);
-
-            e.Graphics.DrawString("TransX: " + MathF.Round(translation.X, 1), font, Brushes.Black, 0, 20);
-            e.Graphics.DrawString("Left/Right", font, Brushes.Black, fromEdge, 20);
-
-            e.Graphics.DrawString("TransY: " + MathF.Round(translation.Y, 1), font, Brushes.Black, 0, 40);
-            e.Graphics.DrawString("Up/Down", font, Brushes.Black, fromEdge, 40);
-
-            e.Graphics.DrawString("TransZ: " + MathF.Round(translation.Z, 1), font, Brushes.Black, 0, 60);
-            e.Graphics.DrawString("PgUp/PgDown", font, Brushes.Black, fromEdge, 60);
-
-            e.Graphics.DrawString("RotX: " + MathF.Round(Matrix.RadiansToDegrees(angleX), 0), font, Brushes.Black, 0, 80);
-            e.Graphics.DrawString("x/X", font, Brushes.Black, fromEdge, 80);
-
-            e.Graphics.DrawString("RotY: " + MathF.Round(Matrix.RadiansToDegrees(angleY), 0), font, Brushes.Black, 0, 100);
-            e.Graphics.DrawString("y/Y", font, Brushes.Black, fromEdge, 100);
-
-            e.Graphics.DrawString("RotZ: " + MathF.Round(Matrix.RadiansToDegrees(angleZ), 0), font, Brushes.Black, 0, 120);
-            e.Graphics.DrawString("z/Z", font, Brushes.Black, fromEdge, 120);
-
-            e.Graphics.DrawString("R: " + MathF.Round(R, 1), font, Brushes.Black, 0, 160);
-            e.Graphics.DrawString("r/R", font, Brushes.Black, fromEdge, 160);
-
-            e.Graphics.DrawString("D: " + D, font, Brushes.Black, 0, 180);
-            e.Graphics.DrawString("d/D", font, Brushes.Black, fromEdge, 180);
-
-            e.Graphics.DrawString("Phi: " + MathF.Round(Phi, 1), font, Brushes.Black, 0, 200);
-            e.Graphics.DrawString("p/P", font, Brushes.Black, fromEdge, 200);
-
-            e.Graphics.DrawString("Theta: " + MathF.Round(Theta, 1), font, Brushes.Black, 0, 220);
-            e.Graphics.DrawString("t/T", font, Brushes.Black, fromEdge, 220);
-
-            e.Graphics.DrawString("isRotating: " + isRotating, font, Brushes.Black, 0, 240);
-            e.Graphics.DrawString("A", font, Brushes.Black, fromEdge, 240);
-
-            e.Graphics.DrawString("Phase: " + phase, font, Brushes.Black, 0, 280);
+            // Draw axes
+            x_axis.Draw(e.Graphics, Viewport(Scale(scale, RotateCamera(R, Theta, Phi, x_axis.VertexBuffer))));
+            y_axis.Draw(e.Graphics, Viewport(Scale(scale, RotateCamera(R, Theta, Phi, y_axis.VertexBuffer))));
+            z_axis.Draw(e.Graphics, Viewport(Scale(scale, RotateCamera(R, Theta, Phi, z_axis.VertexBuffer))));
 
             // Draw cube
-            // model transformation (translation -> rotation -> scale)  -> projection transformation -> viewport
             projection = Scale(scale, Projection(RotateCamera(R, Theta, Phi, cube.VertexBuffer)));
             cube.Draw(e.Graphics, Viewport(projection));
         }
@@ -349,51 +346,57 @@ namespace CG_Cube
                 {
                     if (key == Keys.PageDown)
                     {
-                        TranslateAll(new Vector(0.0f, 0.0f, -angle, 1.0f));
+                        TranslateCube(new Vector(0.0f, 0.0f, -angle, 1.0f));
                     }
                     if (key == Keys.PageUp)
                     {
-                        TranslateAll(new Vector(0.0f, 0.0f, angle, 1.0f));
+                        TranslateCube(new Vector(0.0f, 0.0f, angle, 1.0f));
                     }
                     if (key == Keys.Left)
                     {
-                        TranslateAll(new Vector(-angle, 0.0f, 0.0f, 1.0f));
+                        TranslateCube(new Vector(-angle, 0.0f, 0.0f, 1.0f));
                     }
                     if (key == Keys.Right)
                     {
-                        TranslateAll(new Vector(angle, 0.0f, 0.0f, 1.0f));
+                        TranslateCube(new Vector(angle, 0.0f, 0.0f, 1.0f));
                     }
                     if (key == Keys.Up)
                     {
-                        TranslateAll(new Vector(0.0f, angle, 0.0f, 1.0f));
+                        TranslateCube(new Vector(0.0f, angle, 0.0f, 1.0f));
                     }
                     if (key == Keys.Down)
                     {
-                        TranslateAll(new Vector(0.0f, -angle, 0.0f, 1.0f));
+                        TranslateCube(new Vector(0.0f, -angle, 0.0f, 1.0f));
                     }
                     if (key == Keys.Z && e.Modifiers == Keys.Shift)
                     {
-                        RotateZ(-angle*10, cube.VertexBuffer);
+                        //RotateZ(-angle*10, cube.VertexBuffer);
+                        Theta += 0.1f;
                     }
                     if (key == Keys.Z && e.Modifiers != Keys.Shift)
                     {
-                        RotateZ(angle*10, cube.VertexBuffer);
+                        //RotateZ(angle*10, cube.VertexBuffer);
+                        Theta -= 0.1f;
                     }
                     if (key == Keys.Y && e.Modifiers == Keys.Shift)
                     {
-                        RotateY(-angle*10, cube.VertexBuffer);
+                        //RotateY(-angle*10, cube.VertexBuffer);
+                        R += 0.1f;
                     }
                     if (key == Keys.Y && e.Modifiers != Keys.Shift)
                     {
-                        RotateY(angle*10, cube.VertexBuffer);
+                        //RotateY(angle*10, cube.VertexBuffer);
+                        R -= 0.1f;
                     }
                     if (key == Keys.X && e.Modifiers == Keys.Shift)
                     {
-                        RotateX(-angle*10, cube.VertexBuffer);
+                        //RotateX(-angle*10, cube.VertexBuffer);
+                        Phi += 0.1f;
                     }
                     if (key == Keys.X && e.Modifiers != Keys.Shift)
                     {
-                        RotateX(angle*10, cube.VertexBuffer);
+                        //RotateX(angle*10, cube.VertexBuffer);
+                        Phi -= 0.1f;
                     }
                     if (key == Keys.S && e.Modifiers == Keys.Shift)
                     {
@@ -471,9 +474,9 @@ namespace CG_Cube
             Phi = startPhi;
             R = startR;
 
-            x_axis.VertexBuffer = new AxisX(3).VertexBuffer.ConvertAll(vector => vector.Clone());
-            y_axis.VertexBuffer = new AxisY(3).VertexBuffer.ConvertAll(vector => vector.Clone());
-            z_axis.VertexBuffer = new AxisZ(3).VertexBuffer.ConvertAll(vector => vector.Clone());
+            x_axis.VertexBuffer = new AxisX(Color.Red, 3).VertexBuffer.ConvertAll(vector => vector.Clone());
+            y_axis.VertexBuffer = new AxisY(Color.Green, 3).VertexBuffer.ConvertAll(vector => vector.Clone());
+            z_axis.VertexBuffer = new AxisZ(Color.Blue, 3).VertexBuffer.ConvertAll(vector => vector.Clone());
 
             cube = new Cube(Color.Red);
             cubeModifiers = cubeModifiers.ToDictionary(pair => pair.Key, pair => 0.0f);

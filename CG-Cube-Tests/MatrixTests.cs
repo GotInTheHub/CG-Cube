@@ -360,7 +360,7 @@ namespace CG_Cube_Tests
         [Test]
         public void TranslateMatrix()
         {
-            Matrix matrix = Matrix.TranslateWithVector(new(1, 2, 3));
+            Matrix matrix = Matrix.Translate(new(1, 2, 3));
 
             Assert.Multiple(() =>
             {
