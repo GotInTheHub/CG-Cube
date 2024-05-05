@@ -97,19 +97,19 @@ namespace CG_Cube
         private void Animation1(Shape shape)
         {
             Theta -= 1.0f;
+
             if (scale >= 1.5f)
                 AnimationForward = false;
+            else if (scale < 1.0f)
+            {
+                AnimationForward = true;
+                phase = 2;
+            }
 
             if (AnimationForward)
                 scale += 0.01f;
             else
                 scale -= 0.01f;
-
-            if (scale <= 1.0f)
-            {
-                phase = 2;
-                AnimationForward = true;
-            }
 
             shape.Scale(scale);
         }
@@ -120,17 +120,16 @@ namespace CG_Cube
 
             if (angleX >= Matrix.DegreesToRadians(45))
                 AnimationForward = false;
+            else if (angleX < 0.0f)
+            {
+                phase = 3;
+                AnimationForward = true;
+            }
 
             if (AnimationForward)
                 Rotate(new(Matrix.DegreesToRadians(1), 0.0f, 0.0f), shape);
             else
                 Rotate(new(-Matrix.DegreesToRadians(1), 0.0f, 0.0f), shape);
-
-            if (angleX <= 0.0f)
-            {
-                phase =3;
-                AnimationForward = true;
-            }
         }
 
         private void Animation3(Shape shape)
@@ -138,17 +137,16 @@ namespace CG_Cube
             Phi += 1.0f;
             if (angleY >= Matrix.DegreesToRadians(45))
                 AnimationForward = false;
+            else if (angleY < 0.0f)
+            {
+                AnimationForward = true;
+                phase = 4;
+            }
 
             if (AnimationForward)
                 Rotate(new(0.0f, Matrix.DegreesToRadians(1), 0.0f), shape);
             else
                 Rotate(new(0.0f, -Matrix.DegreesToRadians(1), 0.0f), shape);
-
-            if (angleY <= 0.0f)
-            {
-                AnimationForward = true;
-                phase = 4;
-            }
         }
 
         public void Animation4()
@@ -200,7 +198,7 @@ namespace CG_Cube
 
         private List<Vector> Projection(Shape shape)
         {
-            return Shape.Transform(shape.Projection, R, Theta, Phi);
+            return shape.Transform(shape.Projection, R, Theta, Phi);
         }
 
         private List<Vector> Viewport(List<Vector> vertexBuffer)
@@ -302,22 +300,22 @@ namespace CG_Cube
                 if (value != 0)
                 {
                     if (key == Keys.PageDown)
-                        Translate(new Vector(0.0f, 0.0f, -value, 1.0f), cube);
+                        Translate(new Vector(0.0f, 0.0f, -value * 20, 1.0f), cube);
 
                     if (key == Keys.PageUp)
-                        Translate(new Vector(0.0f, 0.0f, value, 1.0f), cube);
+                        Translate(new Vector(0.0f, 0.0f, value * 20, 1.0f), cube);
 
                     if (key == Keys.Left)
-                        Translate(new Vector(-value, 0.0f, 0.0f, 1.0f), cube);
+                        Translate(new Vector(-value * 20, 0.0f, 0.0f, 1.0f), cube);
 
                     if (key == Keys.Right)
-                        Translate(new Vector(value, 0.0f, 0.0f, 1.0f), cube);
+                        Translate(new Vector(value * 20, 0.0f, 0.0f, 1.0f), cube);
 
                     if (key == Keys.Up)
-                        Translate(new Vector(0.0f, value, 0.0f, 1.0f), cube);
+                        Translate(new Vector(0.0f, value * 20, 0.0f, 1.0f), cube);
 
                     if (key == Keys.Down)
-                        Translate(new Vector(0.0f, -value, 0.0f, 1.0f), cube);
+                        Translate(new Vector(0.0f, -value * 20, 0.0f, 1.0f), cube);
 
                     if (key == Keys.Z)
                     {

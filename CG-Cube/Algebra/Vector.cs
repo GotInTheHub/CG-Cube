@@ -44,6 +44,14 @@
             return new Vector(a.X / b, a.Y / b, a.Z / b);
         }
 
+        public static Vector operator /(float b, Vector a)
+        {
+            if (b == 0)
+                throw new ArgumentException();
+
+            return new Vector(b / a.X, b / a.Y, b / a.Z);
+        }
+
         public static float Dot(Vector a, Vector b)
         {
             return a.X * b.X + a.Y * b.Y + a.Z * b.Z + a.W * b.W;

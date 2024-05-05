@@ -34,6 +34,11 @@
             };
         }
 
+        public Matrix(Matrix m)
+        {
+            matrix = m.matrix;
+        }
+
         public Matrix(Vector vector)
         {
             matrix = new float[4, 4]
@@ -235,6 +240,38 @@
                     0.0f, 0.0f, 1.0f, 0.0f,
                     0.0f, 0.0f, 0.0f, 1.0f
                 );
+        }
+
+        public static Matrix InverseMatrix(Matrix matrix)
+        {
+            Matrix i = new Matrix();
+            Matrix m = new Matrix(matrix);
+
+            float f = m.matrix[1, 0] / m.matrix[0, 0];
+
+            m.matrix[1, 0] = m.matrix[1, 0] - m.matrix[0, 0] * f;
+            m.matrix[1, 1] = m.matrix[1, 1] - m.matrix[0, 1] * f;
+            m.matrix[1, 2] = m.matrix[1, 2] - m.matrix[0, 2] * f;
+
+            i.matrix[1, 0] = i.matrix[1, 0] - i.matrix[0, 0] * f;
+
+            float e = m.matrix[2, 0] / m.matrix[0, 0];
+
+            m.matrix[2, 0] = m.matrix[2, 0] - m.matrix[0, 0] * e;
+            m.matrix[2, 1] = m.matrix[2, 1] - m.matrix[0, 1] * e;
+            m.matrix[2, 2] = m.matrix[2, 2] - i.matrix[0, 2] * e;
+
+            i.matrix[2, 0] = i.matrix[2, 0] - i.matrix[0, 0] * e;
+
+            float k = m.matrix[2, 1] / m.matrix[1, 1];
+
+            m.matrix[2, 1] = m.matrix[2, 1] - m.matrix[1, 1] * k;
+            m.matrix[2, 2] = i.matrix[2, 2] - m.matrix[1, 2] * k;
+
+            i.matrix[2, 0] = i.matrix[2, 0] - i.matrix[1, 0] * k;
+            i.matrix[2, 1] = i.matrix[2, 1] - i.matrix[1, 1] * k;
+
+            return m;
         }
 
         public Vector Spherical(float r, float theta, float phi)

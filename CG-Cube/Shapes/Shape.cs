@@ -31,6 +31,7 @@ namespace CG_Cube.Shapes
             Translation = new Vector();
             IsAnimating = false;
         }
+
         public virtual void ToggleAnimation(bool animate = false)
         {
             IsAnimating = animate;
@@ -63,7 +64,7 @@ namespace CG_Cube.Shapes
         public List<Vector> Rotate(Vector rotation)
         {
             Rotation += rotation;
-            Matrix rotationMatrix = Matrix.Rotate(Rotation);
+            Matrix rotationMatrix = Matrix.Rotate(rotation);
 
             for (int i = 0; i < VertexBuffer.Count; i++)
             {
@@ -78,11 +79,15 @@ namespace CG_Cube.Shapes
         public List<Vector> Scale(float scale)
         {
             Matrix scaleMatrix = Matrix.ScaleMatrix(scale);
+            var prevScale = 1.0f / (Matrix.InverseMatrix(new(Projection.FirstOrDefault())) * 0.01f).ToVector();
 
             for (int i = 0; i < Projection.Count; i++)
             {
-                Projection[i] = VertexBuffer[i] * scaleMatrix;
+                VertexBuffer[i] *= prevScale * scaleMatrix;
             }
+
+            Translate(new());
+
 
             return Projection;
         }
