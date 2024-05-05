@@ -13,6 +13,13 @@ namespace CG_Cube.Axes
                 new Vector(0, 0, 0),
                 new Vector(_size, 0, 0)
             ];
+            Projection = VertexBuffer.ConvertAll(v => v.Clone());
+        }
+
+        public override void Reset()
+        {
+            Projection = new AxisX(color, _size).Projection;
+            base.Reset();
         }
 
         public override void Draw(Graphics graphics, List<Vector> vertexBuffer)

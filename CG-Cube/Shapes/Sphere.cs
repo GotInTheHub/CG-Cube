@@ -8,9 +8,10 @@ namespace CG_Cube.Shapes
         {
         }
 
-        public override void ApplyChange(List<Vector> vertexBuffer)
+        public override void Reset()
         {
-            throw new NotImplementedException();
+            Projection = new Sphere(color, _size).Projection;
+            base.Reset();
         }
 
         public override void Draw(Graphics graphics, List<Vector> vertexBuffer)

@@ -39,6 +39,13 @@ namespace MatrixTransformations
                 new Vector(-1.2f, -1.2f, -1.2f) * size,    //6
                 new Vector(-1.2f,  1.2f, -1.2f) * size     //7
             ];
+            Projection = VertexBuffer.ConvertAll(v => v.Clone());
+        }
+
+        public override void Reset()
+        {
+            Projection = new Cube(color, _size).Projection;
+            base.Reset();
         }
 
         public override void Draw(Graphics g, List<Vector> vb)

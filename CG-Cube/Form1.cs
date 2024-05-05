@@ -31,8 +31,6 @@ namespace CG_Cube
         bool AnimationForward = true;
 
         // Cube Parameters
-        List<Vector> projection = [];
-        Vector translation = new();
         float angleX = 0.0f;
         float angleY = 0.0f;
         float angleZ = 0.0f;
@@ -40,7 +38,8 @@ namespace CG_Cube
         int phase = 1;
 
         // Objects
-        Shape cube;
+        Cube cube;
+        HashSet<Shape> shapes;
 
         // Tools
         readonly System.Timers.Timer timer = new();
@@ -59,6 +58,7 @@ namespace CG_Cube
             { Keys.PageUp, 0.0f },
             { Keys.PageDown, 0.0f },
         };
+
         private readonly Dictionary<Keys, float> cameraModifiers = new()
         {
             { Keys.T, 0.0f },
@@ -81,14 +81,96 @@ namespace CG_Cube
             timer.Start();
 
             // Define axes
-            x_axis = new AxisX(Color.Red, 3);
-            y_axis = new AxisY(Color.Green, 3);
-            z_axis = new AxisZ(Color.Blue, 3);
+            x_axis = new AxisX(Color.Red, 100);
+            y_axis = new AxisY(Color.Green, 100);
+            z_axis = new AxisZ(Color.Blue, 100);
 
             // Create objects
-            cube = new Cube(Color.Red, 1);
+            cube = new Cube(Color.Red, 100);
+            //cube.ModelTransformation(new(), new(), scale);
 
-            DrawText(new(this.CreateGraphics(), this.ClientRectangle));
+            shapes = [cube, x_axis, y_axis, z_axis];
+
+            DrawText(new(CreateGraphics(), ClientRectangle));
+        }
+
+        private void Animation1(Shape shape)
+        {
+            Theta -= 1.0f;
+            if (scale >= 1.5f)
+                AnimationForward = false;
+
+            if (AnimationForward)
+                scale += 0.01f;
+            else
+                scale -= 0.01f;
+
+            if (scale <= 1.0f)
+            {
+                phase = 2;
+                AnimationForward = true;
+            }
+
+            shape.Scale(scale);
+        }
+
+        private void Animation2(Shape shape)
+        {
+            Theta -= 1.0f;
+
+            if (angleX >= Matrix.DegreesToRadians(45))
+                AnimationForward = false;
+
+            if (AnimationForward)
+                Rotate(new(Matrix.DegreesToRadians(1), 0.0f, 0.0f), shape);
+            else
+                Rotate(new(-Matrix.DegreesToRadians(1), 0.0f, 0.0f), shape);
+
+            if (angleX <= 0.0f)
+            {
+                phase =3;
+                AnimationForward = true;
+            }
+        }
+
+        private void Animation3(Shape shape)
+        {
+            Phi += 1.0f;
+            if (angleY >= Matrix.DegreesToRadians(45))
+                AnimationForward = false;
+
+            if (AnimationForward)
+                Rotate(new(0.0f, Matrix.DegreesToRadians(1), 0.0f), shape);
+            else
+                Rotate(new(0.0f, -Matrix.DegreesToRadians(1), 0.0f), shape);
+
+            if (angleY <= 0.0f)
+            {
+                AnimationForward = true;
+                phase = 4;
+            }
+        }
+
+        public void Animation4()
+        {
+            if (Theta != startTheta)
+            {
+                if (Theta < startTheta)
+                    Theta += 1.0f;
+                else
+                    Theta -= 1.0f;
+            }
+            if (Phi != startPhi)
+            {
+                if (Phi < startPhi)
+                    Phi += 1.0f;
+                else
+                    Phi -= 1.0f;
+            }
+            else if (Phi == startPhi && Theta == startTheta)
+            {
+                phase = 1;
+            }
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -97,101 +179,28 @@ namespace CG_Cube
             {
                 if (phase == 1)
                 {
-                    Theta -= 1.0f;
-                    if (scale >= 1.5f)
-                    {
-                        AnimationForward = false;
-                    }
-                    if (AnimationForward)
-                    {
-                        scale += 0.01f;
-                    }
-                    else
-                    {
-                        scale -= 0.01f;
-                    }
-                    if (scale <= 1.0f)
-                    {
-                        phase = 2;
-                        AnimationForward = true;
-                    }
+                    Animation1(cube);
                 }
                 if (phase == 2)
                 {
-                    Theta -= 1.0f;
-                    if (angleX >= Matrix.DegreesToRadians(45))
-                    {
-                        AnimationForward = false;
-                    }
-                    if (AnimationForward)
-                    {
-                        RotateX(Matrix.DegreesToRadians(1), cube.VertexBuffer);
-                    }
-                    else
-                    {
-                        RotateX(-Matrix.DegreesToRadians(1), cube.VertexBuffer);
-                    }
-                    if (angleX <= 0.0f)
-                    {
-                        AnimationForward = true;
-                        phase = 3;
-                    }
+                    Animation2(cube);
                 }
                 if (phase == 3)
                 {
-                    Phi += 1.0f;
-                    if (angleY >= Matrix.DegreesToRadians(45))
-                    {
-                        AnimationForward = false;
-                    }
-                    if (AnimationForward)
-                    {
-                        RotateY(Matrix.DegreesToRadians(1), cube.VertexBuffer);
-                    }
-                    else
-                    {
-                        RotateY(-Matrix.DegreesToRadians(1), cube.VertexBuffer);
-                    }
-                    if (angleY <= 0.0f)
-                    {
-                        AnimationForward = true;
-                        phase = 4;
-                    }
+                    Animation3(cube);
                 }
                 if (phase == 4)
                 {
-                    if (Theta != startTheta)
-                    {
-                        if (Theta < startTheta)
-                            Theta += 1.0f;
-                        else
-                            Theta -= 1.0f;
-                    }
-                    if (Phi != startPhi)
-                    {
-                        if (Phi < startPhi)
-                            Phi += 1.0f;
-                        else
-                            Phi -= 1.0f;
-                    }
-                    else if (Phi == startPhi && Theta == startTheta)
-                    {
-                        phase = 1;
-                    }
+                    Animation4();
                 }
 
                 Invalidate();
             }
         }
 
-        private List<Vector> Projection(List<Vector> vertexBuffer)
+        private List<Vector> Projection(Shape shape)
         {
-            List<Vector> result = [];
-            foreach (Vector vertex in vertexBuffer)
-            {
-                result.Add(vertex * Matrix.ProjectionMatrix(D, vertex));
-            }
-            return result;
+            return Shape.Transform(shape.Projection, R, Theta, Phi);
         }
 
         private List<Vector> Viewport(List<Vector> vertexBuffer)
@@ -204,71 +213,19 @@ namespace CG_Cube
             return result;
         }
 
-        private static List<Vector> Scale(float scale, List<Vector> vertexBuffer)
+        private static List<Vector> Scale(float scale, Shape shape)
         {
-            Matrix scaleMatrix = Matrix.ScaleMatrix(scale);
-            List<Vector> result = [];
-            foreach (Vector vertex in vertexBuffer)
-            {
-                result.Add(vertex * scaleMatrix);
-            }
-            return result;
+            return shape.Scale(scale);
         }
 
-        private static List<Vector> RotateCamera(float r, float theta, float phi, List<Vector> vertexBuffer)
+        private static void Rotate(Vector rotation, Shape shape)
         {
-            Matrix rotateMatrix = Matrix.Transformation(r, theta, phi);
-            List<Vector> cache = new(vertexBuffer);
-            for (int i = 0; i < cache.Count; i++)
-            {
-                cache[i] = cache[i] * rotateMatrix;
-            }
-            return cache;
+            shape.Rotate(rotation);
         }
 
-        private void RotateX(float angle, List<Vector> vertexBuffer)
+        private static List<Vector> Translate(Vector vector, Shape shape)
         {
-            angleX += angle;
-            Matrix rotateMatrix = Matrix.RotateX(angle);
-            for (int i = 0; i < vertexBuffer.Count; i++)
-            {
-                vertexBuffer[i] *= rotateMatrix;
-            }
-        }
-
-        private void RotateY(float angle, List<Vector> vertexBuffer)
-        {
-            angleY += angle;
-            Matrix rotateMatrix = Matrix.RotateY(angle);
-            for (int i = 0; i < vertexBuffer.Count; i++)
-            {
-                vertexBuffer[i] *= rotateMatrix;
-            }
-        }
-
-        private void RotateZ(float angle, List<Vector> vertexBuffer)
-        {
-            angleZ += angle;
-            Matrix rotateMatrix = Matrix.RotateZ(angle);
-            for (int i = 0; i < vertexBuffer.Count; i++)
-            {
-                vertexBuffer[i] *= rotateMatrix;
-            }
-        }
-
-        private static void Translate(Vector vector, List<Vector> vertexBuffer)
-        {
-            Matrix rotationMatrix = Matrix.Translate(vector);
-            for (int i = 0; i < vertexBuffer.Count; i++)
-            {
-                vertexBuffer[i] *= rotationMatrix;
-            }
-        }
-
-        private void TranslateCube(Vector vector)
-        {
-            translation += vector;
-            Translate(vector, cube.VertexBuffer);
+            return shape.Translate(vector);
         }
 
         private static void DrawText(PaintEventArgs e)
@@ -291,14 +248,15 @@ namespace CG_Cube
 
         }
 
-        private void UpdateOnScreenValues(PaintEventArgs e)
+        private void UpdateOnScreenValues(PaintEventArgs e, Shape shape)
         {
             Font font = new("Arial", 12, FontStyle.Bold);
+            NormalizeRotationAngles(shape);
 
             e.Graphics.DrawString("Scale: " + MathF.Round(scale, 2), font, Brushes.Black, 0, 0);
-            e.Graphics.DrawString("TransX: " + MathF.Round(translation.X, 1), font, Brushes.Black, 0, 20);
-            e.Graphics.DrawString("TransY: " + MathF.Round(translation.Y, 1), font, Brushes.Black, 0, 40);
-            e.Graphics.DrawString("TransZ: " + MathF.Round(translation.Z, 1), font, Brushes.Black, 0, 60);
+            e.Graphics.DrawString("TransX: " + MathF.Round(shape.Translation.X, 1), font, Brushes.Black, 0, 20);
+            e.Graphics.DrawString("TransY: " + MathF.Round(shape.Translation.Y, 1), font, Brushes.Black, 0, 40);
+            e.Graphics.DrawString("TransZ: " + MathF.Round(shape.Translation.Z, 1), font, Brushes.Black, 0, 60);
             e.Graphics.DrawString("RotX: " + MathF.Round(Matrix.RadiansToDegrees(angleX), 0), font, Brushes.Black, 0, 80);
             e.Graphics.DrawString("RotY: " + MathF.Round(Matrix.RadiansToDegrees(angleY), 0), font, Brushes.Black, 0, 100);
             e.Graphics.DrawString("RotZ: " + MathF.Round(Matrix.RadiansToDegrees(angleZ), 0), font, Brushes.Black, 0, 120);
@@ -306,109 +264,100 @@ namespace CG_Cube
             e.Graphics.DrawString("D: " + D, font, Brushes.Black, 0, 180);
             e.Graphics.DrawString("Phi: " + MathF.Round(Phi, 1), font, Brushes.Black, 0, 200);
             e.Graphics.DrawString("Theta: " + MathF.Round(Theta, 1), font, Brushes.Black, 0, 220);
-            e.Graphics.DrawString("isRotating: " + isRotating, font, Brushes.Black, 0, 240);
+            e.Graphics.DrawString("isRotating: " + shape.IsAnimating, font, Brushes.Black, 0, 240);
             e.Graphics.DrawString("Phase: " + phase, font, Brushes.Black, 0, 280);
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            NormalizeRotationAngles();
 
             // draw info
-            UpdateOnScreenValues(e);
+            UpdateOnScreenValues(e, cube);
 
             // Draw axes
-            x_axis.Draw(e.Graphics, Viewport(Scale(scale, RotateCamera(R, Theta, Phi, x_axis.VertexBuffer))));
-            y_axis.Draw(e.Graphics, Viewport(Scale(scale, RotateCamera(R, Theta, Phi, y_axis.VertexBuffer))));
-            z_axis.Draw(e.Graphics, Viewport(Scale(scale, RotateCamera(R, Theta, Phi, z_axis.VertexBuffer))));
-
-            // Draw cube
-            projection = Scale(scale, Projection(RotateCamera(R, Theta, Phi, cube.VertexBuffer)));
-            cube.Draw(e.Graphics, Viewport(projection));
+            foreach (Shape shape in shapes)
+            {
+                shape.Draw(e.Graphics, Viewport(Projection(shape)));
+            }
         }
 
-        private void NormalizeRotationAngles()
+        private void NormalizeRotationAngles(Shape shape)
         {
-            angleX = MathF.Atan2(MathF.Sin(angleX), MathF.Cos(angleX));
-            angleY = MathF.Atan2(MathF.Sin(angleY), MathF.Cos(angleY));
-            angleZ = MathF.Atan2(MathF.Sin(angleZ), MathF.Cos(angleZ));
+            var x = shape.Rotation.X;
+            var y = shape.Rotation.Y;
+            var z = shape.Rotation.Z;
+            angleX = MathF.Atan2(MathF.Sin(x), MathF.Cos(x));
+            angleY = MathF.Atan2(MathF.Sin(y), MathF.Cos(y));
+            angleZ = MathF.Atan2(MathF.Sin(z), MathF.Cos(z));
         }
 
         private void UpdateCube(KeyEventArgs e)
         {
             foreach (var keyPair in cubeModifiers)
             {
-                float angle = keyPair.Value;
+                float value = keyPair.Value;
                 Keys key = keyPair.Key;
 
-                if (angle != 0)
+                if (value != 0)
                 {
                     if (key == Keys.PageDown)
-                    {
-                        TranslateCube(new Vector(0.0f, 0.0f, -angle, 1.0f));
-                    }
+                        Translate(new Vector(0.0f, 0.0f, -value, 1.0f), cube);
+
                     if (key == Keys.PageUp)
-                    {
-                        TranslateCube(new Vector(0.0f, 0.0f, angle, 1.0f));
-                    }
+                        Translate(new Vector(0.0f, 0.0f, value, 1.0f), cube);
+
                     if (key == Keys.Left)
-                    {
-                        TranslateCube(new Vector(-angle, 0.0f, 0.0f, 1.0f));
-                    }
+                        Translate(new Vector(-value, 0.0f, 0.0f, 1.0f), cube);
+
                     if (key == Keys.Right)
-                    {
-                        TranslateCube(new Vector(angle, 0.0f, 0.0f, 1.0f));
-                    }
+                        Translate(new Vector(value, 0.0f, 0.0f, 1.0f), cube);
+
                     if (key == Keys.Up)
-                    {
-                        TranslateCube(new Vector(0.0f, angle, 0.0f, 1.0f));
-                    }
+                        Translate(new Vector(0.0f, value, 0.0f, 1.0f), cube);
+
                     if (key == Keys.Down)
+                        Translate(new Vector(0.0f, -value, 0.0f, 1.0f), cube);
+
+                    if (key == Keys.Z)
                     {
-                        TranslateCube(new Vector(0.0f, -angle, 0.0f, 1.0f));
+                        if (e.Modifiers == Keys.Shift)
+                            Rotate(new(0.0f, 0.0f, -value), cube);
+                        else
+                            Rotate(new(0.0f, 0.0f, value), cube);
                     }
-                    if (key == Keys.Z && e.Modifiers == Keys.Shift)
+
+                    if (key == Keys.Y)
                     {
-                        //RotateZ(-angle*10, cube.VertexBuffer);
-                        Theta += 0.1f;
+                        if (e.Modifiers == Keys.Shift)
+                            Rotate(new(0.0f, -value, 0.0f), cube);
+                        else
+                            Rotate(new(0.0f, value, 0.0f), cube);
                     }
-                    if (key == Keys.Z && e.Modifiers != Keys.Shift)
+
+                    if (key == Keys.X)
                     {
-                        //RotateZ(angle*10, cube.VertexBuffer);
-                        Theta -= 0.1f;
+                        if (e.Modifiers == Keys.Shift)
+                            Rotate(new(-value, 0.0f, 0.0f), cube);
+                        else
+                            Rotate(new(value, 0.0f, 0.0f), cube);
                     }
-                    if (key == Keys.Y && e.Modifiers == Keys.Shift)
+
+                    if (key == Keys.S)
                     {
-                        //RotateY(-angle*10, cube.VertexBuffer);
-                        R += 0.1f;
-                    }
-                    if (key == Keys.Y && e.Modifiers != Keys.Shift)
-                    {
-                        //RotateY(angle*10, cube.VertexBuffer);
-                        R -= 0.1f;
-                    }
-                    if (key == Keys.X && e.Modifiers == Keys.Shift)
-                    {
-                        //RotateX(-angle*10, cube.VertexBuffer);
-                        Phi += 0.1f;
-                    }
-                    if (key == Keys.X && e.Modifiers != Keys.Shift)
-                    {
-                        //RotateX(angle*10, cube.VertexBuffer);
-                        Phi -= 0.1f;
-                    }
-                    if (key == Keys.S && e.Modifiers == Keys.Shift)
-                    {
-                        scale += angle;
-                    }
-                    if (key == Keys.S && e.Modifiers != Keys.Shift)
-                    {
-                        scale -= angle;
+                        if (e.Modifiers == Keys.Shift)
+                        {
+                            scale += value;
+                            Scale(scale, cube);
+                        }
+                        else
+                        {
+                            scale -= value;
+                            Scale(scale, cube);
+                        }
                     }
                 }
             }
-            Invalidate();
         }
 
         private void UpdateCamera(KeyEventArgs e)
@@ -420,53 +369,47 @@ namespace CG_Cube
 
                 if (angle != 0)
                 {
-                    if (key == Keys.R && e.Modifiers == Keys.Shift)
+                    if (key == Keys.R)
                     {
-                        R += angle;
+                        if (e.Modifiers == Keys.Shift)
+                            R += angle;
+                        else
+                            R -= angle;
                     }
-                    if (key == Keys.R && e.Modifiers != Keys.Shift)
+
+                    if (key == Keys.D)
                     {
-                        R -= angle;
+                        if (e.Modifiers == Keys.Shift)
+                            D += 10;
+                        else
+                            D -= 10;
                     }
-                    if (key == Keys.D && e.Modifiers == Keys.Shift)
+
+                    if (key == Keys.T)
                     {
-                        D += 10;
+                        if (e.Modifiers == Keys.Shift)
+                            Theta += 10;
+                        else
+                            Theta -= 10;
                     }
-                    if (key == Keys.D && e.Modifiers != Keys.Shift)
+
+                    if (key == Keys.P)
                     {
-                        D-= 10;
-                    }
-                    if (key == Keys.T && e.Modifiers == Keys.Shift)
-                    {
-                        Theta += 10;
-                    }
-                    if (key == Keys.T && e.Modifiers != Keys.Shift)
-                    {
-                        Theta -= 10;
-                    }
-                    if (key == Keys.P && e.Modifiers == Keys.Shift)
-                    {
-                        Phi += 10;
-                    }
-                    if (key == Keys.P && e.Modifiers != Keys.Shift)
-                    {
-                        Phi -= 10;
+                        if (e.Modifiers == Keys.Shift)
+                            Phi += 10;
+                        else
+                            Phi -= 10;
                     }
                 }
             }
         }
 
-        private void ResetCube()
+        private void Reset()
         {
             isRotating = false;
             AnimationForward = true;
             phase = 1;
 
-            angleX = 0.0f;
-            angleY = 0.0f;
-            angleZ = 0.0f;
-
-            translation = new();
             scale = 1.0f;
 
             D = startD;
@@ -474,12 +417,13 @@ namespace CG_Cube
             Phi = startPhi;
             R = startR;
 
-            x_axis.VertexBuffer = new AxisX(Color.Red, 3).VertexBuffer.ConvertAll(vector => vector.Clone());
-            y_axis.VertexBuffer = new AxisY(Color.Green, 3).VertexBuffer.ConvertAll(vector => vector.Clone());
-            z_axis.VertexBuffer = new AxisZ(Color.Blue, 3).VertexBuffer.ConvertAll(vector => vector.Clone());
+            x_axis.Reset();
+            y_axis.Reset();
+            z_axis.Reset();
 
-            cube = new Cube(Color.Red);
+            cube.Reset();
             cubeModifiers = cubeModifiers.ToDictionary(pair => pair.Key, pair => 0.0f);
+            Invalidate();
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
@@ -491,7 +435,7 @@ namespace CG_Cube
                 isRotating = !isRotating;
 
             if (e.KeyCode == Keys.C && e.Modifiers == Keys.Shift)
-                ResetCube();
+                Reset();
 
             if (cubeModifiers.ContainsKey(e.KeyCode))
             {

@@ -7,126 +7,98 @@ namespace CG_Cube.Shapes
         protected readonly int _size;
         protected readonly Color color;
 
-        public float Distance { get; protected set; }
-        public float Theta { get; protected set; }
-        public float Phi { get; protected set; }
-        public float R { get; protected set; }
-
-        public float AngleX { get; protected set; }
-        public float AngleY { get; protected set; }
-        public float AngleZ { get; protected set; }
-
+        public Vector Rotation { get; protected set; }
+        public Vector Translation { get; protected set; }
         public bool IsAnimating { get; protected set; }
 
-        public List<Vector> VertexBuffer { get; set; }
+        protected List<Vector> VertexBuffer { get; set; }
+        public List<Vector> Projection { get; protected set; }
 
         public Shape(Color color, int size = 100)
         {
             _size = size;
-            VertexBuffer = [];
             this.color = color;
+            Rotation = new Vector();
+            Translation = new Vector();
             IsAnimating = false;
+            VertexBuffer = [];
+            Projection = [];
         }
 
+        public virtual void Reset()
+        {
+            Rotation = new();
+            Translation = new Vector();
+            IsAnimating = false;
+        }
         public virtual void ToggleAnimation(bool animate = false)
         {
             IsAnimating = animate;
         }
 
-        public virtual void SetRotationTransformationVars(float d, float theta, float phi, float r)
-        {
-            Distance = d;
-            Theta = theta;
-            Phi = phi;
-            R = r;
-        }
-
         public abstract void Draw(Graphics graphics, List<Vector> vertexBuffer);
 
-        // model transformation (translation -> rotation -> scale) -> projection transformation -> viewport
-
-        public List<Vector> ModelTransformation(List<Vector> vertexBuffer, Vector translation, Vector rotation, float scale)
+        public List<Vector> ModelTransformation(Vector translation, Vector rotation, float scale)
         {
-            List<Vector> clone = new(vertexBuffer);
+            Projection = Translate(translation);
+            Projection = Rotate(rotation);
+            Projection = Scale(scale);
 
-            for (int i = 0; i < vertexBuffer.Count; i++)
-            {
-                Translate(clone, translation);
-                Rotate(clone, rotation);
-                Scale(scale, clone);
-                Project(clone);
-            }
-
-            return clone;
+            return Projection;
         }
 
-        public static List<Vector> Scale(float scale, List<Vector> vertexBuffer)
+        public List<Vector> Translate(Vector translation)
         {
-            List<Vector> clone = new(vertexBuffer);
+            Translation += translation;
+            Matrix translationMatrix = Matrix.Translate(Translation);
 
-            for (int i = 0; i < vertexBuffer.Count; i++)
+            for (int i = 0; i < Projection.Count; i++)
             {
-                clone[i] *= scale;
+                Projection[i] = VertexBuffer[i] * translationMatrix;
             }
 
-            return clone;
+            return Projection;
         }
 
-        public List<Vector> Rotate(List<Vector> vertexBuffer, Vector rotation)
+        public List<Vector> Rotate(Vector rotation)
         {
-            List<Vector> clone = new(vertexBuffer);
-            Matrix rotationMatrix = Matrix.Rotate(rotation);
+            Rotation += rotation;
+            Matrix rotationMatrix = Matrix.Rotate(Rotation);
 
-            for (int i = 0; i < vertexBuffer.Count; i++)
+            for (int i = 0; i < VertexBuffer.Count; i++)
             {
-                clone[i] *= rotationMatrix;
+                VertexBuffer[i] *= rotationMatrix;
             }
 
-            AngleX += rotation.X;
-            AngleY += rotation.Y;
-            AngleZ += rotation.Z;
+            Translate(new());
 
-            return clone;
+            return Projection;
         }
 
-        public List<Vector> Transform(List<Vector> vertexBuffer, float r, float theta, float phi)
+        public List<Vector> Scale(float scale)
         {
-            SetRotationTransformationVars(Distance, r, theta, phi);
+            Matrix scaleMatrix = Matrix.ScaleMatrix(scale);
 
-            List<Vector> clone = new(vertexBuffer);
-            Matrix transformationMatrix = Matrix.Transformation(R, Theta, Phi);
+            for (int i = 0; i < Projection.Count; i++)
+            {
+                Projection[i] = VertexBuffer[i] * scaleMatrix;
+            }
 
-            for (int i = 0; i < vertexBuffer.Count; i++)
+            return Projection;
+        }
+
+        public static List<Vector> Transform(List<Vector> vertexBuffer, float r, float theta, float phi)
+        {
+            // theta = z, phi = x, r = y
+            List<Vector> clone = vertexBuffer.ConvertAll(vector => vector.Clone());
+            Matrix transformationMatrix = Matrix.ViewMatrix(r, theta, phi);
+
+            for (int i = 0; i < clone.Count; i++)
             {
                 clone[i] *= transformationMatrix;
             }
 
             return clone;
-        }
-
-        public static List<Vector> Translate(List<Vector> vertexBuffer, Vector translation)
-        {
-            List<Vector> clone = new(vertexBuffer);
-            Matrix translationMatrix = Matrix.Translate(translation);
-
-            for (int i = 0; i < vertexBuffer.Count; i++)
-            {
-                clone[i] *= translationMatrix;
-            }
-
-            return clone;
-        }
-
-        public List<Vector> Project(List<Vector> vertexBuffer)
-        {
-            List<Vector> result = [];
-
-            for (int i = 0; i < vertexBuffer.Count; i++)
-            {
-                result.Add(vertexBuffer[i] * Matrix.ProjectionMatrix(Distance, vertexBuffer[i]));
-            }
-
-            return result;
         }
     }
 }

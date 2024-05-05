@@ -10,8 +10,9 @@ namespace CG_Cube.Axes
             VertexBuffer =
             [
                 new Vector(0, 0, 0),
-                new Vector(1, 1, 1)
+                new Vector(_size, _size, _size)
             ];
+            Projection = VertexBuffer.ConvertAll(v => v.Clone());
         }
 
         public override void Draw(Graphics graphics, List<Vector> vertexBuffer)

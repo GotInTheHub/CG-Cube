@@ -187,13 +187,18 @@
 
         public static Matrix Rotate(Vector v)
         {
-            return new Matrix
-                (
-                    (float)Math.Cos(v.Z) * (float)Math.Cos(v.Y), (float)-Math.Sin(v.Z), (float)Math.Cos(v.Y), 0.0f,
-                    (float)Math.Sin(v.Z), (float)Math.Cos(v.Z) * (float)Math.Cos(v.X), (float)-Math.Sin(v.X), 0.0f,
-                    (float)-Math.Sin(v.Y), (float)Math.Sin(v.X), (float)Math.Cos(v.Y) * (float)Math.Cos(v.X), 0.0f,
-                    0.0f, 0.0f, 0.0f, 1.0f
-                );
+            //return new Matrix
+            //    (
+            //        (float)Math.Cos(v.Z) * (float)Math.Cos(v.Y), (float)-Math.Sin(v.Z), (float)Math.Cos(v.Y), 0.0f,
+            //        (float)Math.Sin(v.Z), (float)Math.Cos(v.Z) * (float)Math.Cos(v.X), (float)-Math.Sin(v.X), 0.0f,
+            //        (float)-Math.Sin(v.Y), (float)Math.Sin(v.X), (float)Math.Cos(v.Y) * (float)Math.Cos(v.X), 0.0f,
+            //        0.0f, 0.0f, 0.0f, 1.0f
+            //    );
+            //v.X = DegreesToRadians(v.X);
+            //v.Y = DegreesToRadians(v.Y);
+            //v.Z = DegreesToRadians(v.Z);
+
+            return RotateX(v.X) * RotateY(v.Y) * RotateZ(v.Z);
         }
 
         public static Matrix Translate(Vector vector)
@@ -207,7 +212,7 @@
                 );
         }
 
-        public static Matrix Transformation(float r, float theta, float phi)
+        public static Matrix ViewMatrix(float r, float theta, float phi)
         {
             phi = DegreesToRadians(phi);
             theta = DegreesToRadians(theta);
@@ -222,7 +227,7 @@
 
         public static Matrix ProjectionMatrix(float distance, Vector vector)
         {
-            distance = -(distance/ vector.Z);
+            distance = -distance / vector.Z;
             return new Matrix
                 (
                     distance, 0.0f, 0.0f, 0.0f,
