@@ -34,7 +34,7 @@ namespace CG_Cube.Shapes
             IsAnimating = false;
         }
 
-        public virtual void ToggleAnimation()
+        public void ToggleAnimation()
         {
             IsAnimating = !IsAnimating;
         }
@@ -93,7 +93,7 @@ namespace CG_Cube.Shapes
             return Projection;
         }
 
-        public static List<Vector> Transform(List<Vector> vertexBuffer, float r, float theta, float phi)
+        private static List<Vector> Transform(List<Vector> vertexBuffer, float r, float theta, float phi)
         {
             // theta = z, phi = x, r = y
             List<Vector> clone = vertexBuffer.ConvertAll(vector => vector.Clone());
@@ -105,6 +105,18 @@ namespace CG_Cube.Shapes
             }
 
             return clone;
+        }
+
+        public static List<Vector> Project(List<Vector> vertexBuffer, float r, float theta, float phi, float d)
+        {
+            vertexBuffer = Transform(vertexBuffer, r, theta, phi);
+
+            for (int i = 0; i < vertexBuffer.Count; i++)
+            {
+                vertexBuffer[i] *= Matrix.ProjectionMatrix(d, vertexBuffer[i]);
+            }
+
+            return vertexBuffer;
         }
     }
 }

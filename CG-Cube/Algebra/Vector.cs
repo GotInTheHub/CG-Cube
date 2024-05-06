@@ -1,12 +1,19 @@
 ﻿namespace CG_Cube.Algebra
 {
-    public class Vector(float x, float y, float z = 0, float w = 1)
+    public class Vector
     {
-        public float X { get; set; } = x;
-        public float Y { get; set; } = y;
-        public float Z { get; set; } = z;
-        public float W { get; set; } = w;
+        public float X { get; set; }
+        public float Y { get; set; }
+        public float Z { get; set; }
+        public float W { get; set; }
 
+        public Vector(float x, float y, float z = 0, float w = 1)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+            W = w;
+        }
         public Vector() : this(0, 0, 0) { }
 
         public Vector(Vector vector) : this(vector.X, vector.Y, vector.Z, vector.W) { }

@@ -5,8 +5,7 @@ namespace CG_Cube.Axes
 {
     public class AxisX : Axis
     {
-
-        public AxisX(Color color, int size = 100) : base(color, size)
+        public AxisX(Color color, int size = 1) : base(color, size)
         {
             VertexBuffer =
             [
@@ -18,7 +17,9 @@ namespace CG_Cube.Axes
 
         public override void Reset()
         {
-            Projection = new AxisX(color, _size).Projection;
+            AxisX temp = new(color, _size);
+            VertexBuffer = temp.VertexBuffer;
+            Projection = temp.Projection;
             base.Reset();
         }
 

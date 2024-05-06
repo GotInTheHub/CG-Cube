@@ -44,7 +44,9 @@ namespace MatrixTransformations
 
         public override void Reset()
         {
-            Projection = new Cube(color, _size).Projection;
+            Cube temp = new(color, _size);
+            VertexBuffer = temp.VertexBuffer;
+            Projection = temp.Projection;
             base.Reset();
         }
 

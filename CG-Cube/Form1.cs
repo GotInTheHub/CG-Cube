@@ -27,7 +27,6 @@ namespace CG_Cube
         const float startR = 10;
 
         // Animation variables
-        bool isRotating = false;
         bool AnimationForward = true;
 
         // Cube Parameters
@@ -38,33 +37,33 @@ namespace CG_Cube
         int phase = 1;
 
         // Objects
-        Cube cube;
-        HashSet<Shape> shapes;
+        readonly Cube cube;
+        readonly HashSet<Shape> shapes;
 
         // Tools
         readonly System.Timers.Timer timer = new();
 
         // Controls
-        private Dictionary<Keys, float> cubeModifiers = new()
+        private Dictionary<Keys, bool> cubeModifiers = new()
         {
-            { Keys.X, 0.0f },
-            { Keys.Y, 0.0f },
-            { Keys.Z, 0.0f },
-            { Keys.S, 0.0f },
-            { Keys.Left, 0.0f },
-            { Keys.Right, 0.0f },
-            { Keys.Up, 0.0f },
-            { Keys.Down, 0.0f },
-            { Keys.PageUp, 0.0f },
-            { Keys.PageDown, 0.0f },
+            { Keys.X, false },
+            { Keys.Y, false },
+            { Keys.Z, false },
+            { Keys.S, false },
+            { Keys.Left, false },
+            { Keys.Right, false },
+            { Keys.Up, false },
+            { Keys.Down, false },
+            { Keys.PageUp, false },
+            { Keys.PageDown, false },
         };
 
-        private readonly Dictionary<Keys, float> cameraModifiers = new()
+        private readonly Dictionary<Keys, bool> cameraModifiers = new()
         {
-            { Keys.T, 0.0f },
-            { Keys.P, 0.0f },
-            { Keys.R, 0.0f },
-            { Keys.D, 0.0f }
+            { Keys.T, false },
+            { Keys.P, false },
+            { Keys.R, false },
+            { Keys.D, false }
         };
 
         public Form1()
@@ -81,17 +80,14 @@ namespace CG_Cube
             timer.Start();
 
             // Define axes
-            x_axis = new AxisX(Color.Red, 100);
-            y_axis = new AxisY(Color.Green, 100);
-            z_axis = new AxisZ(Color.Blue, 100);
+            x_axis = new AxisX(Color.Red, 3);
+            y_axis = new AxisY(Color.Green, 3);
+            z_axis = new AxisZ(Color.Blue, 3);
 
             // Create objects
-            cube = new Cube(Color.Red, 100);
-            //cube.ModelTransformation(new(), new(), scale);
+            cube = new Cube(Color.Red, 1);
 
             shapes = [cube, x_axis, y_axis, z_axis];
-
-            DrawText(new(CreateGraphics(), ClientRectangle));
         }
 
         private void Animation1(Shape shape)
@@ -149,7 +145,7 @@ namespace CG_Cube
                 Rotate(new(0.0f, -Matrix.DegreesToRadians(1), 0.0f), shape);
         }
 
-        public void Animation4()
+        private void Animation4()
         {
             if (Theta != startTheta)
             {
@@ -171,7 +167,7 @@ namespace CG_Cube
             }
         }
 
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        private void RunAnimation(Shape shape)
         {
             if (cube.IsAnimating)
             {
@@ -191,14 +187,18 @@ namespace CG_Cube
                 {
                     Animation4();
                 }
-
-                Invalidate();
             }
         }
 
-        private List<Vector> Projection(Shape shape)
+        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            return Shape.Transform(shape.Projection, R, Theta, Phi);
+            RunAnimation(cube);
+            Invalidate();
+        }
+
+        private List<Vector> Project(Shape shape)
+        {
+            return Shape.Project(shape.Projection, R, Theta, Phi, D);
         }
 
         private List<Vector> Viewport(List<Vector> vertexBuffer)
@@ -277,7 +277,7 @@ namespace CG_Cube
             // Draw axes
             foreach (Shape shape in shapes)
             {
-                shape.Draw(e.Graphics, Viewport(Projection(shape)));
+                shape.Draw(e.Graphics, Viewport(Project(shape)));
             }
         }
 
@@ -295,63 +295,63 @@ namespace CG_Cube
         {
             foreach (var keyPair in cubeModifiers)
             {
-                float value = keyPair.Value;
                 Keys key = keyPair.Key;
+                var pressed = keyPair.Value;
 
-                if (value != 0)
+                if (pressed)
                 {
                     if (key == Keys.PageDown)
-                        Translate(new Vector(0.0f, 0.0f, -value * 20, 1.0f), cube);
+                        Translate(new Vector(0.0f, 0.0f, -0.1f, 1.0f), cube);
 
                     if (key == Keys.PageUp)
-                        Translate(new Vector(0.0f, 0.0f, value * 20, 1.0f), cube);
+                        Translate(new Vector(0.0f, 0.0f, 0.1f, 1.0f), cube);
 
                     if (key == Keys.Left)
-                        Translate(new Vector(-value * 20, 0.0f, 0.0f, 1.0f), cube);
+                        Translate(new Vector(-0.1f, 0.0f, 0.0f, 1.0f), cube);
 
                     if (key == Keys.Right)
-                        Translate(new Vector(value * 20, 0.0f, 0.0f, 1.0f), cube);
+                        Translate(new Vector(0.1f, 0.0f, 0.0f, 1.0f), cube);
 
                     if (key == Keys.Up)
-                        Translate(new Vector(0.0f, value * 20, 0.0f, 1.0f), cube);
+                        Translate(new Vector(0.0f, 0.1f, 0.0f, 1.0f), cube);
 
                     if (key == Keys.Down)
-                        Translate(new Vector(0.0f, -value * 20, 0.0f, 1.0f), cube);
+                        Translate(new Vector(0.0f, -0.1f, 0.0f, 1.0f), cube);
 
                     if (key == Keys.Z)
                     {
                         if (e.Modifiers == Keys.Shift)
-                            Rotate(new(0.0f, 0.0f, -value), cube);
+                            Rotate(new(0.0f, 0.0f, -Matrix.DegreesToRadians(1)), cube);
                         else
-                            Rotate(new(0.0f, 0.0f, value), cube);
+                            Rotate(new(0.0f, 0.0f, Matrix.DegreesToRadians(1)), cube);
                     }
 
                     if (key == Keys.Y)
                     {
                         if (e.Modifiers == Keys.Shift)
-                            Rotate(new(0.0f, -value, 0.0f), cube);
+                            Rotate(new(0.0f, -Matrix.DegreesToRadians(1), 0.0f), cube);
                         else
-                            Rotate(new(0.0f, value, 0.0f), cube);
+                            Rotate(new(0.0f, Matrix.DegreesToRadians(1), 0.0f), cube);
                     }
 
                     if (key == Keys.X)
                     {
                         if (e.Modifiers == Keys.Shift)
-                            Rotate(new(-value, 0.0f, 0.0f), cube);
+                            Rotate(new(-Matrix.DegreesToRadians(1), 0.0f, 0.0f), cube);
                         else
-                            Rotate(new(value, 0.0f, 0.0f), cube);
+                            Rotate(new(Matrix.DegreesToRadians(1), 0.0f, 0.0f), cube);
                     }
 
                     if (key == Keys.S)
                     {
                         if (e.Modifiers == Keys.Shift)
                         {
-                            scale += value;
+                            scale += 0.1f;
                             Scale(scale, cube);
                         }
                         else
                         {
-                            scale -= value;
+                            scale -= 0.1f;
                             Scale(scale, cube);
                         }
                     }
@@ -363,41 +363,41 @@ namespace CG_Cube
         {
             foreach (var keyPair in cameraModifiers)
             {
-                float angle = keyPair.Value;
+                bool pressed = keyPair.Value;
                 Keys key = keyPair.Key;
 
-                if (angle != 0)
+                if (pressed)
                 {
                     if (key == Keys.R)
                     {
                         if (e.Modifiers == Keys.Shift)
-                            R += angle;
+                            R += 1.0f;
                         else
-                            R -= angle;
+                            R -= 1.0f;
                     }
 
                     if (key == Keys.D)
                     {
                         if (e.Modifiers == Keys.Shift)
-                            D += 10;
+                            D += 1.0f;
                         else
-                            D -= 10;
+                            D -= 1.0f;
                     }
 
                     if (key == Keys.T)
                     {
                         if (e.Modifiers == Keys.Shift)
-                            Theta += 10;
+                            Theta += 1.0f;
                         else
-                            Theta -= 10;
+                            Theta -= 1.0f;
                     }
 
                     if (key == Keys.P)
                     {
                         if (e.Modifiers == Keys.Shift)
-                            Phi += 10;
+                            Phi += 1.0f;
                         else
-                            Phi -= 10;
+                            Phi -= 1.0f;
                     }
                 }
             }
@@ -405,23 +405,18 @@ namespace CG_Cube
 
         private void Reset()
         {
-            isRotating = false;
             AnimationForward = true;
             phase = 1;
-
             scale = 1.0f;
-
             D = startD;
             Theta = startTheta;
             Phi = startPhi;
             R = startR;
 
-            x_axis.Reset();
-            y_axis.Reset();
-            z_axis.Reset();
+            foreach (Shape shape in shapes)
+                shape.Reset();
 
-            cube.Reset();
-            cubeModifiers = cubeModifiers.ToDictionary(pair => pair.Key, pair => 0.0f);
+            cubeModifiers = cubeModifiers.ToDictionary(pair => pair.Key, pair => false);
             Invalidate();
         }
 
@@ -438,12 +433,12 @@ namespace CG_Cube
 
             if (cubeModifiers.ContainsKey(e.KeyCode))
             {
-                cubeModifiers[e.KeyCode] = 0.1f;
+                cubeModifiers[e.KeyCode] = true;
                 UpdateCube(e);
             }
             if (cameraModifiers.ContainsKey(e.KeyCode))
             {
-                cameraModifiers[e.KeyCode] = 1.0f;
+                cameraModifiers[e.KeyCode] = true;
                 UpdateCamera(e);
             }
             Invalidate();
@@ -453,12 +448,12 @@ namespace CG_Cube
         {
             if (cubeModifiers.ContainsKey(e.KeyCode))
             {
-                cubeModifiers[e.KeyCode] = 0.0f;
+                cubeModifiers[e.KeyCode] = false;
                 UpdateCube(e);
             }
             if (cameraModifiers.ContainsKey(e.KeyCode))
             {
-                cameraModifiers[e.KeyCode] = 0.0f;
+                cameraModifiers[e.KeyCode] = false;
                 UpdateCamera(e);
             }
         }

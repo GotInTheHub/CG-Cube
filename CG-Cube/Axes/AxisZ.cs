@@ -16,7 +16,9 @@ namespace CG_Cube.Axes
 
         public override void Reset()
         {
-            Projection = new AxisZ(color, _size).Projection;
+            AxisZ temp = new(color, _size);
+            VertexBuffer = temp.VertexBuffer;
+            Projection = temp.Projection;
             base.Reset();
         }
 

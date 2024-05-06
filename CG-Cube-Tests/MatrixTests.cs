@@ -53,8 +53,8 @@ namespace CG_Cube_Tests
         [Test]
         public void MatrixFromVector()
         {
-            Vector vector = new Vector(1, 2, 3, 4);
-            Matrix matrix = new Matrix(vector);
+            Vector vector = new(1, 2, 3, 4);
+            Matrix matrix = new(vector);
 
             Assert.Multiple(() =>
             {
@@ -68,7 +68,7 @@ namespace CG_Cube_Tests
         [Test]
         public void MatrixToVector()
         {
-            Matrix matrix = new Matrix
+            Matrix matrix = new
             (
                 1, 2, 3, 4,
                 5, 6, 7, 8,
@@ -88,7 +88,7 @@ namespace CG_Cube_Tests
         [Test]
         public void MatrixAddition()
         {
-            Matrix matrix1 = new Matrix
+            Matrix matrix1 = new
             (
                 1, 2, 3, 4,
                 5, 6, 7, 8,
@@ -96,7 +96,7 @@ namespace CG_Cube_Tests
                 13, 14, 15, 16
             );
 
-            Matrix matrix2 = new Matrix
+            Matrix matrix2 = new
             (
                 17, 18, 19, 20,
                 21, 22, 23, 24,
@@ -130,7 +130,7 @@ namespace CG_Cube_Tests
         [Test]
         public void MatrixSubtraction()
         {
-            Matrix matrix1 = new Matrix
+            Matrix matrix1 = new
             (
                 1, 2, 3, 4,
                 5, 6, 7, 8,
@@ -138,7 +138,7 @@ namespace CG_Cube_Tests
                 13, 14, 15, 16
             );
 
-            Matrix matrix2 = new Matrix
+            Matrix matrix2 = new
             (
                 17, 18, 19, 20,
                 21, 22, 23, 24,
@@ -172,7 +172,7 @@ namespace CG_Cube_Tests
         [Test]
         public void MatrixMultiplicationByScalar()
         {
-            Matrix matrix = new Matrix
+            Matrix matrix = new
             (
                 1, 2, 3, 4,
                 5, 6, 7, 8,
@@ -206,7 +206,7 @@ namespace CG_Cube_Tests
         [Test]
         public void MatrixMultiplicationByVector()
         {
-            Matrix matrix = new Matrix
+            Matrix matrix = new
             (
                 1, 2, 3, 4,
                 5, 6, 7, 8,
@@ -214,7 +214,7 @@ namespace CG_Cube_Tests
                 13, 14, 15, 16
             );
 
-            Vector vector = new Vector(1, 2, 3, 4);
+            Vector vector = new(1, 2, 3, 4);
 
             Vector result = matrix * vector;
 
