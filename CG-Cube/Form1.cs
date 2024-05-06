@@ -173,7 +173,7 @@ namespace CG_Cube
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (isRotating)
+            if (cube.IsAnimating)
             {
                 if (phase == 1)
                 {
@@ -198,7 +198,7 @@ namespace CG_Cube
 
         private List<Vector> Projection(Shape shape)
         {
-            return shape.Transform(shape.Projection, R, Theta, Phi);
+            return Shape.Transform(shape.Projection, R, Theta, Phi);
         }
 
         private List<Vector> Viewport(List<Vector> vertexBuffer)
@@ -271,6 +271,7 @@ namespace CG_Cube
             base.OnPaint(e);
 
             // draw info
+            DrawText(e);
             UpdateOnScreenValues(e, cube);
 
             // Draw axes
@@ -430,7 +431,7 @@ namespace CG_Cube
                 Application.Exit();
 
             if (e.KeyCode == Keys.A && e.Modifiers == Keys.Shift)
-                isRotating = !isRotating;
+                cube.ToggleAnimation();
 
             if (e.KeyCode == Keys.C && e.Modifiers == Keys.Shift)
                 Reset();

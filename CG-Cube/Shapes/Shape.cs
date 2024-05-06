@@ -6,6 +6,7 @@ namespace CG_Cube.Shapes
     {
         protected readonly int _size;
         protected readonly Color color;
+        protected float prevScale;
 
         public Vector Rotation { get; protected set; }
         public Vector Translation { get; protected set; }
@@ -17,6 +18,7 @@ namespace CG_Cube.Shapes
         public Shape(Color color, int size = 100)
         {
             _size = size;
+            prevScale = 1;
             this.color = color;
             Rotation = new Vector();
             Translation = new Vector();
@@ -32,9 +34,9 @@ namespace CG_Cube.Shapes
             IsAnimating = false;
         }
 
-        public virtual void ToggleAnimation(bool animate = false)
+        public virtual void ToggleAnimation()
         {
-            IsAnimating = animate;
+            IsAnimating = !IsAnimating;
         }
 
         public abstract void Draw(Graphics graphics, List<Vector> vertexBuffer);
@@ -79,15 +81,14 @@ namespace CG_Cube.Shapes
         public List<Vector> Scale(float scale)
         {
             Matrix scaleMatrix = Matrix.ScaleMatrix(scale);
-            var prevScale = 1.0f / (Matrix.InverseMatrix(new(Projection.FirstOrDefault())) * 0.01f).ToVector();
-
+            Matrix prevScaleMatrix = Matrix.ScaleMatrix(1.0f / prevScale);
             for (int i = 0; i < Projection.Count; i++)
             {
-                VertexBuffer[i] *= prevScale * scaleMatrix;
+                VertexBuffer[i] *= prevScaleMatrix * scaleMatrix;
             }
 
             Translate(new());
-
+            prevScale = scale;
 
             return Projection;
         }

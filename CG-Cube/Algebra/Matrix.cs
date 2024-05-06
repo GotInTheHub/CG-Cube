@@ -192,17 +192,6 @@
 
         public static Matrix Rotate(Vector v)
         {
-            //return new Matrix
-            //    (
-            //        (float)Math.Cos(v.Z) * (float)Math.Cos(v.Y), (float)-Math.Sin(v.Z), (float)Math.Cos(v.Y), 0.0f,
-            //        (float)Math.Sin(v.Z), (float)Math.Cos(v.Z) * (float)Math.Cos(v.X), (float)-Math.Sin(v.X), 0.0f,
-            //        (float)-Math.Sin(v.Y), (float)Math.Sin(v.X), (float)Math.Cos(v.Y) * (float)Math.Cos(v.X), 0.0f,
-            //        0.0f, 0.0f, 0.0f, 1.0f
-            //    );
-            //v.X = DegreesToRadians(v.X);
-            //v.Y = DegreesToRadians(v.Y);
-            //v.Z = DegreesToRadians(v.Z);
-
             return RotateX(v.X) * RotateY(v.Y) * RotateZ(v.Z);
         }
 
@@ -232,7 +221,7 @@
 
         public static Matrix ProjectionMatrix(float distance, Vector vector)
         {
-            distance = -distance / vector.Z;
+            distance = -(distance / vector.Z);
             return new Matrix
                 (
                     distance, 0.0f, 0.0f, 0.0f,
@@ -252,6 +241,7 @@
             m.matrix[1, 0] = m.matrix[1, 0] - m.matrix[0, 0] * f;
             m.matrix[1, 1] = m.matrix[1, 1] - m.matrix[0, 1] * f;
             m.matrix[1, 2] = m.matrix[1, 2] - m.matrix[0, 2] * f;
+            //m.matrix[1, 3] = m.matrix[1, 3] - m.matrix[0, 3] * f;
 
             i.matrix[1, 0] = i.matrix[1, 0] - i.matrix[0, 0] * f;
 
@@ -259,36 +249,20 @@
 
             m.matrix[2, 0] = m.matrix[2, 0] - m.matrix[0, 0] * e;
             m.matrix[2, 1] = m.matrix[2, 1] - m.matrix[0, 1] * e;
-            m.matrix[2, 2] = m.matrix[2, 2] - i.matrix[0, 2] * e;
+            m.matrix[2, 2] = m.matrix[2, 2] - m.matrix[0, 2] * e;
+            //m.matrix[2, 3] = m.matrix[2, 3] - m.matrix[0, 3] * e;
 
             i.matrix[2, 0] = i.matrix[2, 0] - i.matrix[0, 0] * e;
 
             float k = m.matrix[2, 1] / m.matrix[1, 1];
 
             m.matrix[2, 1] = m.matrix[2, 1] - m.matrix[1, 1] * k;
-            m.matrix[2, 2] = i.matrix[2, 2] - m.matrix[1, 2] * k;
+            m.matrix[2, 2] = m.matrix[2, 2] - m.matrix[1, 2] * k;
 
             i.matrix[2, 0] = i.matrix[2, 0] - i.matrix[1, 0] * k;
             i.matrix[2, 1] = i.matrix[2, 1] - i.matrix[1, 1] * k;
 
             return m;
-        }
-
-        public Vector Spherical(float r, float theta, float phi)
-        {
-            Vector v = new Vector();
-
-            float snt = MathF.Sin(theta * MathF.PI / 180);
-            float cnt = MathF.Cos(theta * MathF.PI / 180);
-            float snp = MathF.Sin(phi * MathF.PI / 180);
-            float cnp = MathF.Cos(phi * MathF.PI / 180);
-
-            v.X = r * snt * cnp;
-            v.Y = r * cnt;
-            v.Z = -r * snt * snp;
-            v.W = 1;
-
-            return v;
         }
 
         public static float RadiansToDegrees(float radians)
