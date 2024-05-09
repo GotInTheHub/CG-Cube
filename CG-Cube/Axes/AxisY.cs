@@ -30,5 +30,10 @@ namespace CG_Cube.Axes
             PointF point = new(vertexBuffer[1].X, vertexBuffer[1].Y);
             graphics.DrawString("Y", font, Brushes.Green, point);
         }
+
+        public override string ToString()
+        {
+            return "AxisY";
+        }
     }
 }

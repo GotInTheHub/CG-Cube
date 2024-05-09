@@ -44,9 +44,12 @@ namespace MatrixTransformations
 
         public override void Reset()
         {
-            Cube temp = new(color, _size);
-            VertexBuffer = temp.VertexBuffer;
-            Projection = temp.Projection;
+            if (!_firstMod)
+            {
+                Cube temp = new(color, _size);
+                VertexBuffer = temp.VertexBuffer;
+                Projection = temp.Projection;
+            }
             base.Reset();
         }
 
@@ -77,6 +80,11 @@ namespace MatrixTransformations
                 PointF p = new(vb[i + 8].X, vb[i + 8].Y);
                 g.DrawString(i.ToString(), font, brush, p);
             }
+        }
+
+        public override string ToString()
+        {
+            return "Cube";
         }
     }
 }

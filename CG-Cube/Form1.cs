@@ -28,6 +28,10 @@ namespace CG_Cube
 
         // Animation variables
         bool AnimationForward = true;
+        Shape animatedShape;
+
+        // Modified Shape
+        Shape focusShape;
 
         // Cube Parameters
         float angleX = 0.0f;
@@ -38,13 +42,14 @@ namespace CG_Cube
 
         // Objects
         readonly Cube cube;
+        readonly Pyramid pyramid;
         readonly HashSet<Shape> shapes;
 
         // Tools
         readonly System.Timers.Timer timer = new();
 
         // Controls
-        private Dictionary<Keys, bool> cubeModifiers = new()
+        private Dictionary<Keys, bool> shapeModifiers = new()
         {
             { Keys.X, false },
             { Keys.Y, false },
@@ -86,8 +91,31 @@ namespace CG_Cube
 
             // Create objects
             cube = new Cube(Color.Red, 1);
+            pyramid = new Pyramid(Color.Green, 1);
 
-            shapes = [cube, x_axis, y_axis, z_axis];
+            cube.ModelTransformation(new(3, 3, 0), new(5, 5, 5), 1);
+
+            shapes = [cube, pyramid, x_axis, y_axis, z_axis];
+
+            // Animated Shape
+            animatedShape = pyramid;
+            focusShape = pyramid;
+        }
+
+        private void CreateShape(Vector translation, Vector rotation, float scale, string type, Color color, int size = 1)
+        {
+            if (type.ToLower() == "cube")
+            {
+                Cube c = new(color, size);
+                c.ModelTransformation(translation, rotation, scale);
+                shapes.Add(c);
+            }
+            else if (type.ToLower() == "pyramide")
+            {
+                Pyramid c = new(color, size);
+                c.ModelTransformation(translation, rotation, scale);
+                shapes.Add(c);
+            }
         }
 
         private void Animation1(Shape shape)
@@ -169,19 +197,19 @@ namespace CG_Cube
 
         private void RunAnimation(Shape shape)
         {
-            if (cube.IsAnimating)
+            if (animatedShape.IsAnimating)
             {
                 if (phase == 1)
                 {
-                    Animation1(cube);
+                    Animation1(animatedShape);
                 }
                 if (phase == 2)
                 {
-                    Animation2(cube);
+                    Animation2(animatedShape);
                 }
                 if (phase == 3)
                 {
-                    Animation3(cube);
+                    Animation3(animatedShape);
                 }
                 if (phase == 4)
                 {
@@ -192,7 +220,7 @@ namespace CG_Cube
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            RunAnimation(cube);
+            RunAnimation(animatedShape);
             Invalidate();
         }
 
@@ -243,7 +271,9 @@ namespace CG_Cube
             e.Graphics.DrawString("p/P", font, Brushes.Black, fromEdge, 200);
             e.Graphics.DrawString("t/T", font, Brushes.Black, fromEdge, 220);
             e.Graphics.DrawString("A", font, Brushes.Black, fromEdge, 240);
-
+            e.Graphics.DrawString("1/2", font, Brushes.Black, fromEdge + 10, 260);
+            e.Graphics.DrawString("!/@", font, Brushes.Black, fromEdge + 10, 280);
+            e.Graphics.DrawString("+", font, Brushes.Black, fromEdge, 300);
         }
 
         private void UpdateOnScreenValues(PaintEventArgs e, Shape shape)
@@ -263,7 +293,10 @@ namespace CG_Cube
             e.Graphics.DrawString("Phi: " + MathF.Round(Phi, 1), font, Brushes.Black, 0, 200);
             e.Graphics.DrawString("Theta: " + MathF.Round(Theta, 1), font, Brushes.Black, 0, 220);
             e.Graphics.DrawString("isRotating: " + shape.IsAnimating, font, Brushes.Black, 0, 240);
-            e.Graphics.DrawString("Phase: " + phase, font, Brushes.Black, 0, 280);
+            e.Graphics.DrawString("FocusShape: " + focusShape.ToString(), font, Brushes.Black, 0, 260);
+            e.Graphics.DrawString("AnimatedShape: " + animatedShape.ToString(), font, Brushes.Black, 0, 280);
+            e.Graphics.DrawString("CreateShape" + phase, font, Brushes.Black, 0, 300);
+            e.Graphics.DrawString("Phase: " + phase, font, Brushes.Black, 0, 320);
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -272,7 +305,7 @@ namespace CG_Cube
 
             // draw info
             DrawText(e);
-            UpdateOnScreenValues(e, cube);
+            UpdateOnScreenValues(e, focusShape);
 
             // Draw axes
             foreach (Shape shape in shapes)
@@ -293,7 +326,7 @@ namespace CG_Cube
 
         private void UpdateCube(KeyEventArgs e)
         {
-            foreach (var keyPair in cubeModifiers)
+            foreach (var keyPair in shapeModifiers)
             {
                 Keys key = keyPair.Key;
                 var pressed = keyPair.Value;
@@ -301,45 +334,45 @@ namespace CG_Cube
                 if (pressed)
                 {
                     if (key == Keys.PageDown)
-                        Translate(new Vector(0.0f, 0.0f, -0.1f, 1.0f), cube);
+                        Translate(new Vector(0.0f, 0.0f, -0.1f, 1.0f), focusShape);
 
                     if (key == Keys.PageUp)
-                        Translate(new Vector(0.0f, 0.0f, 0.1f, 1.0f), cube);
+                        Translate(new Vector(0.0f, 0.0f, 0.1f, 1.0f), focusShape);
 
                     if (key == Keys.Left)
-                        Translate(new Vector(-0.1f, 0.0f, 0.0f, 1.0f), cube);
+                        Translate(new Vector(-0.1f, 0.0f, 0.0f, 1.0f), focusShape);
 
                     if (key == Keys.Right)
-                        Translate(new Vector(0.1f, 0.0f, 0.0f, 1.0f), cube);
+                        Translate(new Vector(0.1f, 0.0f, 0.0f, 1.0f), focusShape);
 
                     if (key == Keys.Up)
-                        Translate(new Vector(0.0f, 0.1f, 0.0f, 1.0f), cube);
+                        Translate(new Vector(0.0f, 0.1f, 0.0f, 1.0f), focusShape);
 
                     if (key == Keys.Down)
-                        Translate(new Vector(0.0f, -0.1f, 0.0f, 1.0f), cube);
+                        Translate(new Vector(0.0f, -0.1f, 0.0f, 1.0f), focusShape);
 
                     if (key == Keys.Z)
                     {
                         if (e.Modifiers == Keys.Shift)
-                            Rotate(new(0.0f, 0.0f, -Matrix.DegreesToRadians(1)), cube);
+                            Rotate(new(0.0f, 0.0f, -Matrix.DegreesToRadians(1)), focusShape);
                         else
-                            Rotate(new(0.0f, 0.0f, Matrix.DegreesToRadians(1)), cube);
+                            Rotate(new(0.0f, 0.0f, Matrix.DegreesToRadians(1)), focusShape);
                     }
 
                     if (key == Keys.Y)
                     {
                         if (e.Modifiers == Keys.Shift)
-                            Rotate(new(0.0f, -Matrix.DegreesToRadians(1), 0.0f), cube);
+                            Rotate(new(0.0f, -Matrix.DegreesToRadians(1), 0.0f), focusShape);
                         else
-                            Rotate(new(0.0f, Matrix.DegreesToRadians(1), 0.0f), cube);
+                            Rotate(new(0.0f, Matrix.DegreesToRadians(1), 0.0f), focusShape);
                     }
 
                     if (key == Keys.X)
                     {
                         if (e.Modifiers == Keys.Shift)
-                            Rotate(new(-Matrix.DegreesToRadians(1), 0.0f, 0.0f), cube);
+                            Rotate(new(-Matrix.DegreesToRadians(1), 0.0f, 0.0f), focusShape);
                         else
-                            Rotate(new(Matrix.DegreesToRadians(1), 0.0f, 0.0f), cube);
+                            Rotate(new(Matrix.DegreesToRadians(1), 0.0f, 0.0f), focusShape);
                     }
 
                     if (key == Keys.S)
@@ -347,12 +380,12 @@ namespace CG_Cube
                         if (e.Modifiers == Keys.Shift)
                         {
                             scale += 0.1f;
-                            Scale(scale, cube);
+                            Scale(scale, focusShape);
                         }
                         else
                         {
                             scale -= 0.1f;
-                            Scale(scale, cube);
+                            Scale(scale, focusShape);
                         }
                     }
                 }
@@ -416,7 +449,7 @@ namespace CG_Cube
             foreach (Shape shape in shapes)
                 shape.Reset();
 
-            cubeModifiers = cubeModifiers.ToDictionary(pair => pair.Key, pair => false);
+            shapeModifiers = shapeModifiers.ToDictionary(pair => pair.Key, pair => false);
             Invalidate();
         }
 
@@ -426,14 +459,30 @@ namespace CG_Cube
                 Application.Exit();
 
             if (e.KeyCode == Keys.A && e.Modifiers == Keys.Shift)
-                cube.ToggleAnimation();
+                animatedShape.ToggleAnimation();
 
             if (e.KeyCode == Keys.C && e.Modifiers == Keys.Shift)
                 Reset();
 
-            if (cubeModifiers.ContainsKey(e.KeyCode))
+            if (e.KeyCode == Keys.D1)
             {
-                cubeModifiers[e.KeyCode] = true;
+                if (e.Modifiers == Keys.Shift)
+                    animatedShape = cube;
+                else
+                    focusShape = cube;
+            }
+
+            if (e.KeyCode == Keys.D2)
+            {
+                if (e.Modifiers == Keys.Shift)
+                    animatedShape = pyramid;
+                else
+                    focusShape = pyramid;
+            }
+
+            if (shapeModifiers.ContainsKey(e.KeyCode))
+            {
+                shapeModifiers[e.KeyCode] = true;
                 UpdateCube(e);
             }
             if (cameraModifiers.ContainsKey(e.KeyCode))
@@ -446,9 +495,9 @@ namespace CG_Cube
 
         private void Form1_KeyUp(object sender, KeyEventArgs e)
         {
-            if (cubeModifiers.ContainsKey(e.KeyCode))
+            if (shapeModifiers.ContainsKey(e.KeyCode))
             {
-                cubeModifiers[e.KeyCode] = false;
+                shapeModifiers[e.KeyCode] = false;
                 UpdateCube(e);
             }
             if (cameraModifiers.ContainsKey(e.KeyCode))

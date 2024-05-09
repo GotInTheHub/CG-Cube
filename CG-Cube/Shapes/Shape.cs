@@ -4,6 +4,10 @@ namespace CG_Cube.Shapes
 {
     public abstract class Shape
     {
+        protected bool _firstMod;
+        protected Tuple<Vector, Vector, float>? _startMods;
+
+
         protected readonly int _size;
         protected readonly Color color;
         protected float prevScale;
@@ -15,8 +19,9 @@ namespace CG_Cube.Shapes
         protected List<Vector> VertexBuffer { get; set; }
         public List<Vector> Projection { get; protected set; }
 
-        public Shape(Color color, int size = 100)
+        public Shape(Color color, int size = 1)
         {
+            _firstMod = false;
             _size = size;
             prevScale = 1;
             this.color = color;
@@ -29,8 +34,18 @@ namespace CG_Cube.Shapes
 
         public virtual void Reset()
         {
-            Rotation = new();
-            Translation = new Vector();
+            if (!_firstMod)
+            {
+                Translation = new Vector();
+                Rotation = new();
+            }
+            else
+            {
+                Translation = _startMods.Item1;
+                Rotation = _startMods.Item2;
+                Projection = Scale(_startMods.Item3);
+            }
+
             IsAnimating = false;
         }
 
@@ -43,6 +58,12 @@ namespace CG_Cube.Shapes
 
         public List<Vector> ModelTransformation(Vector translation, Vector rotation, float scale)
         {
+            if (!_firstMod)
+            {
+                _firstMod = true;
+                _startMods = Tuple.Create(translation, rotation, scale);
+            }
+
             Projection = Translate(translation);
             Projection = Rotate(rotation);
             Projection = Scale(scale);
@@ -117,6 +138,11 @@ namespace CG_Cube.Shapes
             }
 
             return vertexBuffer;
+        }
+
+        public override string ToString()
+        {
+            return "Shape";
         }
     }
 }

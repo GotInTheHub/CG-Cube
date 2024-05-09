@@ -20,5 +20,10 @@ namespace CG_Cube.Axes
             Pen pen = new(color, 2f);
             graphics.DrawLine(pen, vertexBuffer[0].X, vertexBuffer[0].Y, vertexBuffer[1].X, vertexBuffer[1].Y);
         }
+
+        public override string ToString()
+        {
+            return "Axis";
+        }
     }
 }
