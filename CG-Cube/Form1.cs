@@ -2,6 +2,7 @@ using CG_Cube.Algebra;
 using CG_Cube.Axes;
 using CG_Cube.Shapes;
 using MatrixTransformations;
+using System.Reflection;
 using System.Timers;
 
 namespace CG_Cube
@@ -110,7 +111,7 @@ namespace CG_Cube
                 c.ModelTransformation(translation, rotation, scale);
                 shapes.Add(c);
             }
-            else if (type.ToLower() == "pyramide")
+            else if (type.ToLower() == "pyramid")
             {
                 Pyramid c = new(color, size);
                 c.ModelTransformation(translation, rotation, scale);
@@ -464,6 +465,9 @@ namespace CG_Cube
             if (e.KeyCode == Keys.C && e.Modifiers == Keys.Shift)
                 Reset();
 
+            if (e.KeyCode == Keys.Add)
+                CreateShape_Click(this, e);
+
             if (e.KeyCode == Keys.D1)
             {
                 if (e.Modifiers == Keys.Shift)
@@ -512,6 +516,211 @@ namespace CG_Cube
             CENTER.X = this.Width * 0.5f;
             CENTER.Y = this.Height * 0.5f;
             Invalidate();
+        }
+
+        private void CreateShape_Click(object sender, EventArgs e)
+        {
+            Tuple<Vector, Vector, float, string, Color, int> shape = new(new(), new(), 1f, string.Empty, Color.Black, 1);
+
+            if (InputBox("Create Shape", ref shape) == DialogResult.OK)
+            {
+                CreateShape(shape.Item1, shape.Item2, shape.Item3, shape.Item4, shape.Item5, shape.Item6);
+            }
+        }
+
+        private DialogResult InputBox(string title, ref Tuple<Vector, Vector, float, string, Color, int> shape)
+        {
+            Form form = new Form();
+            Label rotationLabel = new();
+            Label rotationXLabel = new();
+            Label rotationYLabel = new();
+            Label rotationZLabel = new();
+
+            Label translationLabel = new();
+            Label translationXLabel = new();
+            Label translationYLabel = new();
+            Label translationZLabel = new();
+
+            Label scaleLabel = new();
+            Label shapeTypeLabel = new();
+            Label colorLabel = new();
+            Label sizeLabel = new();
+
+            TextBox translationXBox = new();
+            TextBox translationYBox = new();
+            TextBox translationZBox = new();
+
+            TextBox rotationXBox = new();
+            TextBox rotationYBox = new();
+            TextBox rotationZBox = new();
+
+            TextBox scaleBox = new();
+            TextBox sizeBox = new();
+
+            Button buttonOK = new();
+            Button buttonCancel = new();
+
+            ComboBox colorList = new()
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            List<Color> colors = GetAllColors();
+            for (int i = 0; i<colors.Count; i++)
+            {
+                colorList.Items.Add(colors[i].Name);
+            }
+
+            ComboBox shapeList = new()
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            List<string> shapeNames = new(GetShapeTypes());
+            for (int i = 0; i < shapeNames.Count; i++)
+            {
+                shapeList.Items.Add(shapeNames[i]);
+            }
+
+
+            form.Text = title;
+            shapeTypeLabel.Text = "Shape Type";
+
+            translationLabel.Text = "Translation";
+            translationXLabel.Text = "X";
+            translationYLabel.Text = "Y";
+            translationZLabel.Text = "Z";
+
+            rotationLabel.Text = "Rotation";
+            rotationXLabel.Text = "X";
+            rotationYLabel.Text = "Y";
+            rotationZLabel.Text = "Z";
+
+            scaleLabel.Text = "Scale";
+            colorLabel.Text = "Color";
+            sizeLabel.Text = "Size";
+
+            buttonOK.Text = "OK";
+            buttonCancel.Text = "Cancel";
+            buttonOK.DialogResult = DialogResult.OK;
+            buttonCancel.DialogResult = DialogResult.Cancel;
+
+            int width = form.ClientSize.Width;
+            int height = form.ClientSize.Height;
+
+            shapeTypeLabel.SetBounds(35, 35, 100, 20);
+            shapeList.SetBounds(35, 55, 100, 20);
+
+            colorLabel.SetBounds(150, 35, 150, 20);
+            colorList.SetBounds(150, 55, 150, 20);
+
+            sizeLabel.SetBounds(315, 35, 50, 20);
+            sizeBox.SetBounds(315, 55, 50, 20);
+
+            translationLabel.SetBounds(35, 100, 100, 15);
+            translationXLabel.SetBounds(35, 120, 10, 15);
+            translationXBox.SetBounds(50, 120, 30, 15);
+            translationYLabel.SetBounds(85, 120, 10, 15);
+            translationYBox.SetBounds(100, 120, 30, 15);
+            translationZLabel.SetBounds(135, 120, 10, 15);
+            translationZBox.SetBounds(150, 120, 30, 15);
+
+            rotationLabel.SetBounds(220, 100, 100, 15);
+            rotationXLabel.SetBounds(220, 120, 10, 15);
+            rotationXBox.SetBounds(235, 120, 30, 15);
+            rotationYLabel.SetBounds(270, 120, 10, 15);
+            rotationYBox.SetBounds(285, 120, 30, 15);
+            rotationZLabel.SetBounds(320, 120, 10, 15);
+            rotationZBox.SetBounds(335, 120, 30, 15);
+
+
+            buttonOK.SetBounds(40, height - 36, 80, 40);
+            buttonCancel.SetBounds(130, height - 36, 80, 40);
+
+            shapeTypeLabel.AutoSize = true;
+            form.ClientSize = new Size(796, 307);
+            form.FormBorderStyle = FormBorderStyle.FixedDialog;
+            form.StartPosition = FormStartPosition.CenterParent;
+            form.MinimizeBox = false;
+            form.MaximizeBox = false;
+
+            form.Controls.AddRange([
+                shapeTypeLabel, shapeList,
+                colorLabel, colorList,
+                sizeLabel, sizeBox,
+                translationLabel,
+                translationXLabel, translationXBox,
+                translationYLabel, translationYBox,
+                translationZLabel, translationZBox,
+                rotationLabel,
+                rotationXLabel, rotationXBox,
+                rotationYLabel, rotationYBox,
+                rotationZLabel, rotationZBox,
+                buttonOK, buttonCancel
+                ]);
+            form.AcceptButton = buttonOK;
+            form.CancelButton = buttonCancel;
+
+            DialogResult dialogResult = form.ShowDialog();
+
+
+            Vector translation = new();
+            Vector rotation = new();
+            float scale = 1.0f;
+            string shapeType = "cube";
+            int size = 1;
+            Color c = Color.White;
+
+            if (ValidNumberInput(translationXBox.Text) && ValidNumberInput(translationYBox.Text) && ValidNumberInput(translationZBox.Text))
+                translation = new(float.Parse(translationXBox.Text), float.Parse(translationYBox.Text), float.Parse(translationZBox.Text));
+
+            if (ValidNumberInput(rotationXBox.Text) && ValidNumberInput(rotationYBox.Text) && ValidNumberInput(rotationZBox.Text))
+                rotation = new(float.Parse(rotationXBox.Text), float.Parse(rotationYBox.Text), float.Parse(rotationZBox.Text));
+
+            if (ValidNumberInput(scaleBox.Text))
+                scale = float.Parse(scaleBox.Text);
+
+            if (shapeList.SelectedItem is not null)
+                shapeType = shapeList.SelectedItem.ToString()!;
+
+            if (ValidNumberInput(sizeBox.Text))
+                size = int.Parse(sizeBox.Text);
+
+            if (colorList.SelectedItem is not null)
+                c = colors.Where(col => col.Name == colorList.SelectedItem.ToString()).FirstOrDefault();
+
+            shape = Tuple.Create(translation, rotation, scale, shapeType, c, size);
+
+            return dialogResult;
+        }
+
+        private static bool ValidNumberInput(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return false;
+            if (System.Text.RegularExpressions.Regex.IsMatch(input, "^[0-9][-+][0-9]+$"))
+            {
+                MessageBox.Show("Please enter only numbers");
+                return false;
+            }
+            return true;
+        }
+
+        private List<string> GetShapeTypes()
+        {
+            return ["Cube", "Pyramid"];
+        }
+
+        private List<Color> GetAllColors()
+        {
+            List<Color> allColors = new List<Color>();
+
+            foreach (PropertyInfo property in typeof(Color).GetProperties())
+            {
+                if (property.PropertyType == typeof(Color))
+                {
+                    allColors.Add((Color)property.GetValue(null));
+                }
+            }
+
+            return allColors;
         }
     }
 }
