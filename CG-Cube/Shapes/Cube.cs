@@ -15,7 +15,7 @@ namespace MatrixTransformations
         //      |/         |/                  z
         //      2----------1
 
-        public Cube(Color color, int size = 1) : base(color, size)
+        public Cube(Color color, float size = 1) : base(color, size)
         {
             VertexBuffer =
             [

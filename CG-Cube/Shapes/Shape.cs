@@ -7,8 +7,7 @@ namespace CG_Cube.Shapes
         protected bool _firstMod;
         protected Tuple<Vector, Vector, float>? _startMods;
 
-
-        protected readonly int _size;
+        protected readonly float _size;
         protected readonly Color color;
         protected float prevScale;
 
@@ -19,7 +18,7 @@ namespace CG_Cube.Shapes
         protected List<Vector> VertexBuffer { get; set; }
         public List<Vector> Projection { get; protected set; }
 
-        public Shape(Color color, int size = 1)
+        public Shape(Color color, float size = 1)
         {
             _firstMod = false;
             _size = size;

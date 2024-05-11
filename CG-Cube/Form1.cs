@@ -103,7 +103,7 @@ namespace CG_Cube
             focusShape = pyramid;
         }
 
-        private void CreateShape(Vector translation, Vector rotation, float scale, string type, Color color, int size = 1)
+        private void CreateShape(Vector translation, Vector rotation, float scale, string type, Color color, float size = 1f)
         {
             if (type.Equals("cube", StringComparison.CurrentCultureIgnoreCase))
             {
@@ -198,19 +198,19 @@ namespace CG_Cube
 
         private void RunAnimation(Shape shape)
         {
-            if (animatedShape.IsAnimating)
+            if (shape.IsAnimating)
             {
                 if (phase == 1)
                 {
-                    Animation1(animatedShape);
+                    Animation1(shape);
                 }
                 if (phase == 2)
                 {
-                    Animation2(animatedShape);
+                    Animation2(shape);
                 }
                 if (phase == 3)
                 {
-                    Animation3(animatedShape);
+                    Animation3(shape);
                 }
                 if (phase == 4)
                 {
@@ -258,7 +258,7 @@ namespace CG_Cube
         private static void DrawText(PaintEventArgs e)
         {
             Font font = new("Arial", 12, FontStyle.Bold);
-            int fromEdge = 170;
+            int fromEdge = 220;
 
             e.Graphics.DrawString("s/S", font, Brushes.Black, fromEdge, 0);
             e.Graphics.DrawString("Left/Right", font, Brushes.Black, fromEdge, 20);
@@ -272,8 +272,8 @@ namespace CG_Cube
             e.Graphics.DrawString("p/P", font, Brushes.Black, fromEdge, 200);
             e.Graphics.DrawString("t/T", font, Brushes.Black, fromEdge, 220);
             e.Graphics.DrawString("A", font, Brushes.Black, fromEdge, 240);
-            e.Graphics.DrawString("1/2", font, Brushes.Black, fromEdge + 10, 260);
-            e.Graphics.DrawString("!/@", font, Brushes.Black, fromEdge + 10, 280);
+            e.Graphics.DrawString("1/2", font, Brushes.Black, fromEdge, 260);
+            e.Graphics.DrawString("!/@", font, Brushes.Black, fromEdge, 280);
             e.Graphics.DrawString("+", font, Brushes.Black, fromEdge, 300);
         }
 
@@ -520,7 +520,7 @@ namespace CG_Cube
 
         private void CreateShape_Click(object sender, EventArgs e)
         {
-            Tuple<Vector, Vector, float, string, Color, int> shape = new(new(), new(), 1f, string.Empty, Color.Black, 1);
+            Tuple<Vector, Vector, float, string, Color, float> shape = new(new(), new(), 1f, string.Empty, Color.Black, 1f);
 
             if (InputBox("Create Shape", ref shape) == DialogResult.OK)
             {
@@ -528,8 +528,9 @@ namespace CG_Cube
             }
         }
 
-        private static DialogResult InputBox(string title, ref Tuple<Vector, Vector, float, string, Color, int> shape)
+        private static DialogResult InputBox(string title, ref Tuple<Vector, Vector, float, string, Color, float> shape)
         {
+            #region FormInitialisation
             Form form = new();
             Label rotationLabel = new();
             Label rotationXLabel = new();
@@ -657,32 +658,38 @@ namespace CG_Cube
             form.CancelButton = buttonCancel;
 
             DialogResult dialogResult = form.ShowDialog();
-
+            #endregion
 
             Vector translation = new();
             Vector rotation = new();
             float scale = 1.0f;
             string shapeType = "cube";
-            int size = 1;
+            float size = 1;
             Color c = Color.White;
 
-            if (ValidNumberInput(translationXBox.Text) && ValidNumberInput(translationYBox.Text) && ValidNumberInput(translationZBox.Text))
-                translation = new(float.Parse(translationXBox.Text), float.Parse(translationYBox.Text), float.Parse(translationZBox.Text));
+            if (!(ValidNumberInput(translationXBox.Text) && ValidNumberInput(translationYBox.Text) && ValidNumberInput(translationZBox.Text)))
+                return DialogResult.Cancel;
+            translation = new(float.Parse(translationXBox.Text), float.Parse(translationYBox.Text), float.Parse(translationZBox.Text));
 
-            if (ValidNumberInput(rotationXBox.Text) && ValidNumberInput(rotationYBox.Text) && ValidNumberInput(rotationZBox.Text))
-                rotation = new(float.Parse(rotationXBox.Text), float.Parse(rotationYBox.Text), float.Parse(rotationZBox.Text));
+            if (!(ValidNumberInput(rotationXBox.Text) && ValidNumberInput(rotationYBox.Text) && ValidNumberInput(rotationZBox.Text)))
+                return DialogResult.Cancel;
+            rotation = new(float.Parse(rotationXBox.Text), float.Parse(rotationYBox.Text), float.Parse(rotationZBox.Text));
 
-            if (ValidNumberInput(scaleBox.Text))
-                scale = float.Parse(scaleBox.Text);
+            if (!ValidNumberInput(scaleBox.Text))
+                return DialogResult.Cancel;
+            scale = float.Parse(scaleBox.Text);
 
-            if (shapeList.SelectedItem is not null)
-                shapeType = shapeList.SelectedItem.ToString()!;
+            if (shapeList.SelectedItem is null)
+                return DialogResult.Cancel;
+            shapeType = shapeList.SelectedItem.ToString()!;
 
-            if (ValidNumberInput(sizeBox.Text))
-                size = int.Parse(sizeBox.Text);
+            if (!ValidNumberInput(sizeBox.Text))
+                return DialogResult.Cancel;
+            size = float.Parse(sizeBox.Text);
 
-            if (colorList.SelectedItem is not null)
-                c = colors.Where(col => col.Name == colorList.SelectedItem.ToString()).FirstOrDefault();
+            if (colorList.SelectedItem is null)
+                return DialogResult.Cancel;
+            c = colors.Where(col => col.Name == colorList.SelectedItem.ToString()).FirstOrDefault();
 
             shape = Tuple.Create(translation, rotation, scale, shapeType, c, size);
 
@@ -692,7 +699,7 @@ namespace CG_Cube
         private static bool ValidNumberInput(string input)
         {
             if (string.IsNullOrWhiteSpace(input)) return false;
-            if (System.Text.RegularExpressions.Regex.IsMatch(input, "^[0-9][-+][0-9]+$"))
+            if (!NumberRegex().IsMatch(input))
             {
                 MessageBox.Show("Please enter only numbers");
                 return false;
@@ -707,17 +714,20 @@ namespace CG_Cube
 
         private static List<Color> GetAllColors()
         {
-            List<Color> allColors = new List<Color>();
+            List<Color> allColors = [];
 
             foreach (PropertyInfo property in typeof(Color).GetProperties())
             {
                 if (property.PropertyType == typeof(Color))
                 {
-                    allColors.Add((Color)property.GetValue(null));
+                    allColors.Add((Color)property.GetValue(null)!);
                 }
             }
 
             return allColors;
         }
+
+        [System.Text.RegularExpressions.GeneratedRegex(@"^[0-9]*(?:\.[0-9]+)?$")]
+        private static partial System.Text.RegularExpressions.Regex NumberRegex();
     }
 }

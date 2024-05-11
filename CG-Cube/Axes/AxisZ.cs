@@ -4,7 +4,7 @@ namespace CG_Cube.Axes
 {
     public class AxisZ : Axis
     {
-        public AxisZ(Color color, int size = 100) : base(color, size)
+        public AxisZ(Color color, float size = 3) : base(color, size)
         {
             VertexBuffer =
             [

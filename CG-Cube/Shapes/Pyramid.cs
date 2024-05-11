@@ -13,7 +13,7 @@ namespace CG_Cube.Shapes
         //       //       \ /
         //      2----------1
 
-        public Pyramid(Color color, int size = 100) : base(color, size)
+        public Pyramid(Color color, float size = 1) : base(color, size)
         {
             VertexBuffer =
             [
