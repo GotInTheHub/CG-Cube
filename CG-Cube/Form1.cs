@@ -105,13 +105,13 @@ namespace CG_Cube
 
         private void CreateShape(Vector translation, Vector rotation, float scale, string type, Color color, int size = 1)
         {
-            if (type.ToLower() == "cube")
+            if (type.Equals("cube", StringComparison.CurrentCultureIgnoreCase))
             {
                 Cube c = new(color, size);
                 c.ModelTransformation(translation, rotation, scale);
                 shapes.Add(c);
             }
-            else if (type.ToLower() == "pyramid")
+            else if (type.Equals("pyramid", StringComparison.CurrentCultureIgnoreCase))
             {
                 Pyramid c = new(color, size);
                 c.ModelTransformation(translation, rotation, scale);
@@ -465,7 +465,7 @@ namespace CG_Cube
             if (e.KeyCode == Keys.C && e.Modifiers == Keys.Shift)
                 Reset();
 
-            if (e.KeyCode == Keys.Add)
+            if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus)
                 CreateShape_Click(this, e);
 
             if (e.KeyCode == Keys.D1)
@@ -528,9 +528,9 @@ namespace CG_Cube
             }
         }
 
-        private DialogResult InputBox(string title, ref Tuple<Vector, Vector, float, string, Color, int> shape)
+        private static DialogResult InputBox(string title, ref Tuple<Vector, Vector, float, string, Color, int> shape)
         {
-            Form form = new Form();
+            Form form = new();
             Label rotationLabel = new();
             Label rotationXLabel = new();
             Label rotationYLabel = new();
@@ -603,8 +603,12 @@ namespace CG_Cube
             buttonOK.DialogResult = DialogResult.OK;
             buttonCancel.DialogResult = DialogResult.Cancel;
 
-            int width = form.ClientSize.Width;
-            int height = form.ClientSize.Height;
+            shapeTypeLabel.AutoSize = true;
+            form.ClientSize = new Size(400, 200);
+            form.FormBorderStyle = FormBorderStyle.FixedDialog;
+            form.StartPosition = FormStartPosition.CenterParent;
+            form.MinimizeBox = false;
+            form.MaximizeBox = false;
 
             shapeTypeLabel.SetBounds(35, 35, 100, 20);
             shapeList.SetBounds(35, 55, 100, 20);
@@ -631,16 +635,9 @@ namespace CG_Cube
             rotationZLabel.SetBounds(320, 120, 10, 15);
             rotationZBox.SetBounds(335, 120, 30, 15);
 
+            buttonOK.SetBounds(35, 150, 95, 40);
+            buttonCancel.SetBounds(270, 150, 95, 40);
 
-            buttonOK.SetBounds(40, height - 36, 80, 40);
-            buttonCancel.SetBounds(130, height - 36, 80, 40);
-
-            shapeTypeLabel.AutoSize = true;
-            form.ClientSize = new Size(796, 307);
-            form.FormBorderStyle = FormBorderStyle.FixedDialog;
-            form.StartPosition = FormStartPosition.CenterParent;
-            form.MinimizeBox = false;
-            form.MaximizeBox = false;
 
             form.Controls.AddRange([
                 shapeTypeLabel, shapeList,
@@ -703,12 +700,12 @@ namespace CG_Cube
             return true;
         }
 
-        private List<string> GetShapeTypes()
+        private static List<string> GetShapeTypes()
         {
             return ["Cube", "Pyramid"];
         }
 
-        private List<Color> GetAllColors()
+        private static List<Color> GetAllColors()
         {
             List<Color> allColors = new List<Color>();
 
