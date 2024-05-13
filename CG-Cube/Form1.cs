@@ -277,6 +277,7 @@ namespace CG_Cube
             e.Graphics.DrawString("`", font, Brushes.Black, fromEdge, 260);
             e.Graphics.DrawString("~", font, Brushes.Black, fromEdge, 280);
             e.Graphics.DrawString("+", font, Brushes.Black, fromEdge, 300);
+            e.Graphics.DrawString("-", font, Brushes.Black, fromEdge, 320);
         }
 
         private void UpdateOnScreenValues(PaintEventArgs e, Shape shape)
@@ -299,7 +300,8 @@ namespace CG_Cube
             e.Graphics.DrawString("SelectedShape: " + selectedShape.Name, font, Brushes.Black, 0, 260);
             e.Graphics.DrawString("AnimatedShape: " + animatedShape.Name, font, Brushes.Black, 0, 280);
             e.Graphics.DrawString("CreateShape", font, Brushes.Black, 0, 300);
-            e.Graphics.DrawString("Phase: " + phase, font, Brushes.Black, 0, 320);
+            e.Graphics.DrawString("RemoveShape", font, Brushes.Black, 0, 320);
+            e.Graphics.DrawString("Phase: " + phase, font, Brushes.Black, 0, 340);
         }
 
         protected override void OnPaint(PaintEventArgs e)
