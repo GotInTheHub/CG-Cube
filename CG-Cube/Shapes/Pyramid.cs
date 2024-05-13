@@ -15,6 +15,7 @@ namespace CG_Cube.Shapes
 
         public Pyramid(Color color, float size = 1) : base(color, size)
         {
+            Name = "Pyramid";
             VertexBuffer =
             [
                 new Vector( 0.0f,  1.0f, 0.0f) * size,     //0
@@ -39,6 +40,7 @@ namespace CG_Cube.Shapes
             Pyramid temp = new(color, _size);
             VertexBuffer = temp.VertexBuffer;
             Projection = temp.Projection;
+
             base.Reset();
         }
 
@@ -57,22 +59,12 @@ namespace CG_Cube.Shapes
             g.DrawLine(pen, vb[3].X, vb[3].Y, vb[4].X, vb[4].Y);    //3 -> 4
             g.DrawLine(pen, vb[4].X, vb[4].Y, vb[1].X, vb[1].Y);    //4 -> 1
 
-            ////pen.DashStyle = DashStyle.DashDot;
-            //g.DrawLine(pen, vb[0].X, vb[0].Y, vb[4].X, vb[4].Y);    //0 -> 4
-            //g.DrawLine(pen, vb[1].X, vb[1].Y, vb[5].X, vb[5].Y);    //1 -> 5
-            //g.DrawLine(pen, vb[2].X, vb[2].Y, vb[6].X, vb[6].Y);    //2 -> 6
-            //g.DrawLine(pen, vb[3].X, vb[3].Y, vb[7].X, vb[7].Y);    //3 -> 7
-
             Font font = new("Arial", 12, FontStyle.Bold);
             for (int i = 0; i < 5; i++)
             {
                 PointF p = new(vb[i + 5].X, vb[i + 5].Y);
                 g.DrawString(i.ToString(), font, brush, p);
             }
-        }
-        public override string ToString()
-        {
-            return "Pyramid";
         }
     }
 }

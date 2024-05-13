@@ -17,6 +17,7 @@ namespace MatrixTransformations
 
         public Cube(Color color, float size = 1) : base(color, size)
         {
+            Name = "Cube";
             VertexBuffer =
             [
                 new Vector( 1.0f,  1.0f, 1.0f) * size,     //0
@@ -44,12 +45,10 @@ namespace MatrixTransformations
 
         public override void Reset()
         {
-            if (!_firstMod)
-            {
-                Cube temp = new(color, _size);
-                VertexBuffer = temp.VertexBuffer;
-                Projection = temp.Projection;
-            }
+            Cube temp = new(color, _size);
+            VertexBuffer = temp.VertexBuffer;
+            Projection = temp.Projection;
+
             base.Reset();
         }
 
@@ -80,11 +79,6 @@ namespace MatrixTransformations
                 PointF p = new(vb[i + 8].X, vb[i + 8].Y);
                 g.DrawString(i.ToString(), font, brush, p);
             }
-        }
-
-        public override string ToString()
-        {
-            return "Cube";
         }
     }
 }

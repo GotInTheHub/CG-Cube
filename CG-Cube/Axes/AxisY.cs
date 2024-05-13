@@ -6,6 +6,7 @@ namespace CG_Cube.Axes
     {
         public AxisY(Color color, float size = 3) : base(color, size)
         {
+            Name = "AxisY";
             VertexBuffer =
             [
                 new Vector(0, 0, 0),
@@ -19,6 +20,7 @@ namespace CG_Cube.Axes
             AxisY temp = new(color, _size);
             VertexBuffer = temp.VertexBuffer;
             Projection = temp.Projection;
+
             base.Reset();
         }
 
@@ -29,11 +31,6 @@ namespace CG_Cube.Axes
             Font font = new("Arial", 10);
             PointF point = new(vertexBuffer[1].X, vertexBuffer[1].Y);
             graphics.DrawString("Y", font, Brushes.Green, point);
-        }
-
-        public override string ToString()
-        {
-            return "AxisY";
         }
     }
 }

@@ -11,11 +11,11 @@ namespace CG_Cube.Shapes
         protected readonly Color color;
         protected float _scale;
 
-        public float Enlargement { get => _scale; set => this.Scale(value); }
+        public float Enlargement { get => _scale; set => Scale(value); }
         public Vector Rotation { get; protected set; }
         public Vector Translation { get; protected set; }
         public bool IsAnimating { get; protected set; }
-
+        public string Name { get; protected set; }
         protected List<Vector> VertexBuffer { get; set; }
         public List<Vector> Projection { get; protected set; }
 
@@ -23,10 +23,11 @@ namespace CG_Cube.Shapes
         {
             _firstMod = false;
             _size = size;
-            _scale = 1;
+            _scale = 1f;
             this.color = color;
             Rotation = new Vector();
             Translation = new Vector();
+            Name = "Shape";
             IsAnimating = false;
             VertexBuffer = [];
             Projection = [];
@@ -34,19 +35,19 @@ namespace CG_Cube.Shapes
 
         public virtual void Reset()
         {
-            if (!_firstMod)
-            {
-                Translation = new Vector();
-                Rotation = new();
-            }
-            else
-            {
-                Translation = _startMods!.Item1;
-                Rotation = _startMods.Item2;
-                Projection = Scale(_startMods.Item3);
-            }
+            Translation = new Vector();
+            Rotation = new();
+            Enlargement = 1.0f;
+
+            if (_firstMod)
+                ModelTransformation(_startMods!.Item1, _startMods.Item2, _startMods.Item3);
 
             IsAnimating = false;
+        }
+
+        public void Rename(string newName)
+        {
+            Name = newName;
         }
 
         public void ToggleAnimation()
@@ -99,7 +100,7 @@ namespace CG_Cube.Shapes
             return Projection;
         }
 
-        public List<Vector> Scale(float scale)
+        private List<Vector> Scale(float scale)
         {
             Matrix scaleMatrix = Matrix.ScaleMatrix(scale);
             Matrix prevScaleMatrix = Matrix.ScaleMatrix(1.0f / _scale);
@@ -108,8 +109,8 @@ namespace CG_Cube.Shapes
                 VertexBuffer[i] *= prevScaleMatrix * scaleMatrix;
             }
 
-            Translate(new());
             _scale = scale;
+            Translate(new());
 
             return Projection;
         }
@@ -138,11 +139,6 @@ namespace CG_Cube.Shapes
             }
 
             return vertexBuffer;
-        }
-
-        public override string ToString()
-        {
-            return "Shape";
         }
     }
 }

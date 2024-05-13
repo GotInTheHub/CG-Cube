@@ -31,22 +31,22 @@ namespace CG_Cube
         // Animation variables
         bool AnimationForward = true;
         Shape animatedShape;
+        private int animatedShapeIndex = 0;
 
         // Modified Shape
         private Shape selectedShape;
-        private int shapeIndex = 0;
+        private int selectedShapeIndex = 0;
 
         // Cube Parameters
         float angleX = 0.0f;
         float angleY = 0.0f;
         float angleZ = 0.0f;
-        float scale = 1.0f;
         int phase = 1;
 
         // Objects
         readonly Cube cube;
         readonly Pyramid pyramid;
-        readonly HashSet<Shape> shapes;
+        readonly Dictionary<string, Shape> shapes;
 
         // Tools
         readonly System.Timers.Timer timer = new();
@@ -97,28 +97,34 @@ namespace CG_Cube
             cube = new Cube(Color.Red, 1);
             pyramid = new Pyramid(Color.Green, 1);
 
-            cube.ModelTransformation(new(3, 3, 0), new(5, 5, 5), 1);
+            pyramid.ModelTransformation(new(3, 3, 0), new(5, 5, 5), 1);
 
-            shapes = [cube, pyramid];
+            shapes = new()
+            {
+                { cube.Name.ToLower(), cube },
+                { pyramid.Name.ToLower(), pyramid }
+            };
 
             // Animated Shape
-            animatedShape = pyramid;
-            selectedShape = pyramid;
+            animatedShape = cube;
+            selectedShape = cube;
         }
 
-        private void CreateShape(Vector translation, Vector rotation, string type, Color color, float size = 1f)
+        private void CreateShape(Vector translation, Vector rotation, string type, Color color, float size, string name)
         {
             if (type.Equals("cube", StringComparison.CurrentCultureIgnoreCase))
             {
                 Cube c = new(color, size);
-                c.ModelTransformation(translation, rotation, scale);
-                shapes.Add(c);
+                c.ModelTransformation(translation, rotation, 1f);
+                c.Rename(name);
+                shapes.Add(c.Name, c);
             }
             else if (type.Equals("pyramid", StringComparison.CurrentCultureIgnoreCase))
             {
                 Pyramid c = new(color, size);
-                c.ModelTransformation(translation, rotation, scale);
-                shapes.Add(c);
+                c.ModelTransformation(translation, rotation, 1f);
+                c.Rename(name);
+                shapes.Add(c.Name, c);
             }
         }
 
@@ -126,20 +132,18 @@ namespace CG_Cube
         {
             Theta -= 1.0f;
 
-            if (scale >= 1.5f)
+            if (shape.Enlargement >= 1.5f)
                 AnimationForward = false;
-            else if (scale < 1.0f)
+            else if (shape.Enlargement < 1.0f)
             {
                 AnimationForward = true;
                 phase = 2;
             }
 
             if (AnimationForward)
-                scale += 0.01f;
+                shape.Enlargement += 0.01f;
             else
-                scale -= 0.01f;
-
-            shape.Scale(scale);
+                shape.Enlargement -= 0.01f;
         }
 
         private void Animation2(Shape shape)
@@ -243,11 +247,6 @@ namespace CG_Cube
             return result;
         }
 
-        private static List<Vector> Scale(float scale, Shape shape)
-        {
-            return shape.Scale(scale);
-        }
-
         private static void Rotate(Vector rotation, Shape shape)
         {
             shape.Rotate(rotation);
@@ -276,7 +275,7 @@ namespace CG_Cube
             e.Graphics.DrawString("t/T", font, Brushes.Black, fromEdge, 220);
             e.Graphics.DrawString("A", font, Brushes.Black, fromEdge, 240);
             e.Graphics.DrawString("`", font, Brushes.Black, fromEdge, 260);
-            e.Graphics.DrawString("!/@", font, Brushes.Black, fromEdge, 280);
+            e.Graphics.DrawString("~", font, Brushes.Black, fromEdge, 280);
             e.Graphics.DrawString("+", font, Brushes.Black, fromEdge, 300);
         }
 
@@ -297,9 +296,9 @@ namespace CG_Cube
             e.Graphics.DrawString("Phi: " + MathF.Round(Phi, 1), font, Brushes.Black, 0, 200);
             e.Graphics.DrawString("Theta: " + MathF.Round(Theta, 1), font, Brushes.Black, 0, 220);
             e.Graphics.DrawString("isRotating: " + shape.IsAnimating, font, Brushes.Black, 0, 240);
-            e.Graphics.DrawString("SelectedShape: " + selectedShape.ToString(), font, Brushes.Black, 0, 260);
-            e.Graphics.DrawString("AnimatedShape: " + animatedShape.ToString(), font, Brushes.Black, 0, 280);
-            e.Graphics.DrawString("CreateShape" + phase, font, Brushes.Black, 0, 300);
+            e.Graphics.DrawString("SelectedShape: " + selectedShape.Name, font, Brushes.Black, 0, 260);
+            e.Graphics.DrawString("AnimatedShape: " + animatedShape.Name, font, Brushes.Black, 0, 280);
+            e.Graphics.DrawString("CreateShape", font, Brushes.Black, 0, 300);
             e.Graphics.DrawString("Phase: " + phase, font, Brushes.Black, 0, 320);
         }
 
@@ -318,7 +317,7 @@ namespace CG_Cube
             }
 
             // Draw shapes
-            foreach (Shape shape in shapes)
+            foreach (Shape shape in shapes.Values)
             {
                 shape.Draw(e.Graphics, Viewport(Project(shape)));
             }
@@ -452,36 +451,63 @@ namespace CG_Cube
                 Reset();
 
             if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus)
-                CreateShape_Click(this, e);
+                CreateShape(this, e);
+
+            if (e.KeyCode == Keys.Subtract || e.KeyCode == Keys.OemMinus)
+                RemoveShape(this, e);
 
             if (e.KeyCode == Keys.Oem3)
-                CycleSelectedShape();
+                if (e.Modifiers  == Keys.Shift)
+                    CycleSelectedShape("anim");
+                else
+                    CycleSelectedShape("selec");
         }
 
         private void Reset()
         {
             AnimationForward = true;
             phase = 1;
-            scale = 1.0f;
             D = startD;
             Theta = startTheta;
             Phi = startPhi;
             R = startR;
 
-            foreach (Shape shape in shapes)
+            foreach (Axis axis in axes)
+                axis.Reset();
+
+            foreach (Shape shape in shapes.Values)
                 shape.Reset();
 
             shapeModifiers = shapeModifiers.ToDictionary(pair => pair.Key, pair => false);
             Invalidate();
         }
 
-        private void CycleSelectedShape()
+        private void CycleSelectedShape(string sender)
         {
-            shapeIndex++;
-            if (shapeIndex >= shapes.Count)
-                shapeIndex = 0;
+            try
+            {
+                if (sender == "selec")
+                {
+                    selectedShapeIndex++;
+                    if (selectedShapeIndex >= shapes.Count)
+                        selectedShapeIndex = 0;
 
-            selectedShape = shapes.ElementAt(shapeIndex);
+                    selectedShape = shapes.ElementAt(selectedShapeIndex).Value;
+
+                }
+                else if (sender == "anim")
+                {
+                    animatedShapeIndex++;
+                    if (animatedShapeIndex >= shapes.Count)
+                        animatedShapeIndex = 0;
+
+                    animatedShape = shapes.ElementAt(animatedShapeIndex).Value;
+                }
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                MessageBox.Show($"No more shapes in list: {e.Message}");
+            }
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
@@ -524,17 +550,76 @@ namespace CG_Cube
             Invalidate();
         }
 
-        private void CreateShape_Click(object sender, EventArgs e)
+        private void CreateShape(object sender, EventArgs e)
         {
-            Tuple<Vector, Vector, string, Color, float> shape = new(new(), new(), string.Empty, Color.Black, 1f);
+            Tuple<Vector, Vector, string, Color, float, string> shape = new(new(), new(), string.Empty, Color.Black, 1f, string.Empty);
 
-            if (InputBox("Create Shape", ref shape) == DialogResult.OK)
+            if (ShapeCreationBox("Create Shape", ref shape) == DialogResult.OK)
             {
-                CreateShape(shape.Item1, shape.Item2, shape.Item3, shape.Item4, shape.Item5);
+                CreateShape(shape.Item1, shape.Item2, shape.Item3, shape.Item4, shape.Item5, shape.Item6);
             }
         }
 
-        private static DialogResult InputBox(string title, ref Tuple<Vector, Vector, string, Color, float> shape)
+        private void RemoveShape(object sender, EventArgs e)
+        {
+            string shapeName = string.Empty;
+            ShapeRemovalBox(ref shapeName);
+
+            if (!shapes.ContainsKey(shapeName))
+            {
+                MessageBox.Show($"No shape with that name exists");
+                return;
+            }
+            else
+                shapes.Remove(shapeName);
+        }
+
+        private static DialogResult ShapeRemovalBox(ref string shapeName)
+        {
+            #region FormInitialisation
+            Form form = new();
+            Label shapeNameLabel = new();
+            TextBox shapeNameTextBox = new();
+
+            Button buttonOK = new();
+            Button buttonCancel = new();
+
+            form.Text = "Remove Shape";
+            shapeNameLabel.Text = "Name of shape to be removed";
+
+            buttonOK.Text = "OK";
+            buttonCancel.Text = "Cancel";
+            buttonOK.DialogResult = DialogResult.OK;
+            buttonCancel.DialogResult = DialogResult.Cancel;
+
+            form.ClientSize = new Size(400, 200);
+            form.FormBorderStyle = FormBorderStyle.FixedDialog;
+            form.StartPosition = FormStartPosition.CenterParent;
+            form.MinimizeBox = false;
+            form.MaximizeBox = false;
+
+            shapeNameLabel.SetBounds(35, 35, 100, 20);
+            shapeNameTextBox.SetBounds(35, 55, 100, 20);
+
+            buttonOK.SetBounds(35, 150, 95, 40);
+            buttonCancel.SetBounds(270, 150, 95, 40);
+
+
+            form.Controls.AddRange([
+                shapeNameLabel, shapeNameTextBox,
+                buttonOK, buttonCancel
+                ]);
+            form.AcceptButton = buttonOK;
+            form.CancelButton = buttonCancel;
+
+            DialogResult dialogResult = form.ShowDialog();
+            #endregion
+
+            shapeName = shapeNameTextBox.Text.ToLower();
+            return dialogResult;
+        }
+
+        private static DialogResult ShapeCreationBox(string title, ref Tuple<Vector, Vector, string, Color, float, string> shape)
         {
             #region FormInitialisation
             Form form = new();
@@ -551,6 +636,7 @@ namespace CG_Cube
             Label shapeTypeLabel = new();
             Label colorLabel = new();
             Label sizeLabel = new();
+            Label nameLabel = new();
 
             TextBox translationXBox = new();
             TextBox translationYBox = new();
@@ -561,6 +647,7 @@ namespace CG_Cube
             TextBox rotationZBox = new();
 
             TextBox sizeBox = new();
+            TextBox nameBox = new();
 
             Button buttonOK = new();
             Button buttonCancel = new();
@@ -601,6 +688,7 @@ namespace CG_Cube
 
             colorLabel.Text = "Color";
             sizeLabel.Text = "Size";
+            nameLabel.Text = "Name";
 
             buttonOK.Text = "OK";
             buttonCancel.Text = "Cancel";
@@ -614,6 +702,8 @@ namespace CG_Cube
             form.MinimizeBox = false;
             form.MaximizeBox = false;
 
+            nameLabel.SetBounds(35, 5, 40, 20);
+            nameBox.SetBounds(80, 5, 285, 20);
             shapeTypeLabel.SetBounds(35, 35, 100, 20);
             shapeList.SetBounds(35, 55, 100, 20);
 
@@ -655,6 +745,7 @@ namespace CG_Cube
                 rotationXLabel, rotationXBox,
                 rotationYLabel, rotationYBox,
                 rotationZLabel, rotationZBox,
+                nameLabel, nameBox,
                 buttonOK, buttonCancel
                 ]);
             form.AcceptButton = buttonOK;
@@ -666,6 +757,7 @@ namespace CG_Cube
             Vector translation = new();
             Vector rotation = new();
             string shapeType = "cube";
+            string shapeName = shapeType;
             float size = 1;
             Color c = Color.White;
 
@@ -689,7 +781,10 @@ namespace CG_Cube
                 return DialogResult.Cancel;
             c = colors.Where(col => col.Name == colorList.SelectedItem.ToString()).FirstOrDefault();
 
-            shape = Tuple.Create(translation, rotation, shapeType, c, size);
+            if (!string.IsNullOrWhiteSpace(nameBox.Text))
+                shapeName = nameBox.Text.ToLower();
+
+            shape = Tuple.Create(translation, rotation, shapeType, c, size, shapeName);
 
             return dialogResult;
         }
@@ -725,7 +820,7 @@ namespace CG_Cube
             return allColors;
         }
 
-        [System.Text.RegularExpressions.GeneratedRegex(@"^[0-9]*(?:\.[0-9]+)?$")]
+        [System.Text.RegularExpressions.GeneratedRegex(@"^-?\d*\.?\d+$")]
         private static partial System.Text.RegularExpressions.Regex NumberRegex();
     }
 }
