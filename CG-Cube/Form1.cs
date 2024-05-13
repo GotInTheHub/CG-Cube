@@ -16,6 +16,7 @@ namespace CG_Cube
 
         // Axes
         readonly Axis x_axis, y_axis, z_axis;
+        readonly HashSet<Axis> axes;
 
         // Camera Parameters
         float D = 800;
@@ -32,7 +33,8 @@ namespace CG_Cube
         Shape animatedShape;
 
         // Modified Shape
-        Shape focusShape;
+        private Shape selectedShape;
+        private int shapeIndex = 0;
 
         // Cube Parameters
         float angleX = 0.0f;
@@ -89,6 +91,7 @@ namespace CG_Cube
             x_axis = new AxisX(Color.Red, 3);
             y_axis = new AxisY(Color.Green, 3);
             z_axis = new AxisZ(Color.Blue, 3);
+            axes = [x_axis, y_axis, z_axis];
 
             // Create objects
             cube = new Cube(Color.Red, 1);
@@ -96,14 +99,14 @@ namespace CG_Cube
 
             cube.ModelTransformation(new(3, 3, 0), new(5, 5, 5), 1);
 
-            shapes = [cube, pyramid, x_axis, y_axis, z_axis];
+            shapes = [cube, pyramid];
 
             // Animated Shape
             animatedShape = pyramid;
-            focusShape = pyramid;
+            selectedShape = pyramid;
         }
 
-        private void CreateShape(Vector translation, Vector rotation, float scale, string type, Color color, float size = 1f)
+        private void CreateShape(Vector translation, Vector rotation, string type, Color color, float size = 1f)
         {
             if (type.Equals("cube", StringComparison.CurrentCultureIgnoreCase))
             {
@@ -258,7 +261,7 @@ namespace CG_Cube
         private static void DrawText(PaintEventArgs e)
         {
             Font font = new("Arial", 12, FontStyle.Bold);
-            int fromEdge = 220;
+            int fromEdge = 250;
 
             e.Graphics.DrawString("s/S", font, Brushes.Black, fromEdge, 0);
             e.Graphics.DrawString("Left/Right", font, Brushes.Black, fromEdge, 20);
@@ -272,7 +275,7 @@ namespace CG_Cube
             e.Graphics.DrawString("p/P", font, Brushes.Black, fromEdge, 200);
             e.Graphics.DrawString("t/T", font, Brushes.Black, fromEdge, 220);
             e.Graphics.DrawString("A", font, Brushes.Black, fromEdge, 240);
-            e.Graphics.DrawString("1/2", font, Brushes.Black, fromEdge, 260);
+            e.Graphics.DrawString("`", font, Brushes.Black, fromEdge, 260);
             e.Graphics.DrawString("!/@", font, Brushes.Black, fromEdge, 280);
             e.Graphics.DrawString("+", font, Brushes.Black, fromEdge, 300);
         }
@@ -294,7 +297,7 @@ namespace CG_Cube
             e.Graphics.DrawString("Phi: " + MathF.Round(Phi, 1), font, Brushes.Black, 0, 200);
             e.Graphics.DrawString("Theta: " + MathF.Round(Theta, 1), font, Brushes.Black, 0, 220);
             e.Graphics.DrawString("isRotating: " + shape.IsAnimating, font, Brushes.Black, 0, 240);
-            e.Graphics.DrawString("FocusShape: " + focusShape.ToString(), font, Brushes.Black, 0, 260);
+            e.Graphics.DrawString("SelectedShape: " + selectedShape.ToString(), font, Brushes.Black, 0, 260);
             e.Graphics.DrawString("AnimatedShape: " + animatedShape.ToString(), font, Brushes.Black, 0, 280);
             e.Graphics.DrawString("CreateShape" + phase, font, Brushes.Black, 0, 300);
             e.Graphics.DrawString("Phase: " + phase, font, Brushes.Black, 0, 320);
@@ -306,9 +309,15 @@ namespace CG_Cube
 
             // draw info
             DrawText(e);
-            UpdateOnScreenValues(e, focusShape);
+            UpdateOnScreenValues(e, selectedShape);
 
             // Draw axes
+            foreach (Axis axis in axes)
+            {
+                axis.Draw(e.Graphics, Viewport(Project(axis)));
+            }
+
+            // Draw shapes
             foreach (Shape shape in shapes)
             {
                 shape.Draw(e.Graphics, Viewport(Project(shape)));
@@ -325,7 +334,7 @@ namespace CG_Cube
             angleZ = MathF.Atan2(MathF.Sin(z), MathF.Cos(z));
         }
 
-        private void UpdateCube(KeyEventArgs e)
+        private void ShapeControls(KeyEventArgs e)
         {
             foreach (var keyPair in shapeModifiers)
             {
@@ -335,45 +344,45 @@ namespace CG_Cube
                 if (pressed)
                 {
                     if (key == Keys.PageDown)
-                        Translate(new Vector(0.0f, 0.0f, -0.1f, 1.0f), focusShape);
+                        Translate(new Vector(0.0f, 0.0f, -0.1f, 1.0f), selectedShape);
 
                     if (key == Keys.PageUp)
-                        Translate(new Vector(0.0f, 0.0f, 0.1f, 1.0f), focusShape);
+                        Translate(new Vector(0.0f, 0.0f, 0.1f, 1.0f), selectedShape);
 
                     if (key == Keys.Left)
-                        Translate(new Vector(-0.1f, 0.0f, 0.0f, 1.0f), focusShape);
+                        Translate(new Vector(-0.1f, 0.0f, 0.0f, 1.0f), selectedShape);
 
                     if (key == Keys.Right)
-                        Translate(new Vector(0.1f, 0.0f, 0.0f, 1.0f), focusShape);
+                        Translate(new Vector(0.1f, 0.0f, 0.0f, 1.0f), selectedShape);
 
                     if (key == Keys.Up)
-                        Translate(new Vector(0.0f, 0.1f, 0.0f, 1.0f), focusShape);
+                        Translate(new Vector(0.0f, 0.1f, 0.0f, 1.0f), selectedShape);
 
                     if (key == Keys.Down)
-                        Translate(new Vector(0.0f, -0.1f, 0.0f, 1.0f), focusShape);
+                        Translate(new Vector(0.0f, -0.1f, 0.0f, 1.0f), selectedShape);
 
                     if (key == Keys.Z)
                     {
                         if (e.Modifiers == Keys.Shift)
-                            Rotate(new(0.0f, 0.0f, -Matrix.DegreesToRadians(1)), focusShape);
+                            Rotate(new(0.0f, 0.0f, -Matrix.DegreesToRadians(1)), selectedShape);
                         else
-                            Rotate(new(0.0f, 0.0f, Matrix.DegreesToRadians(1)), focusShape);
+                            Rotate(new(0.0f, 0.0f, Matrix.DegreesToRadians(1)), selectedShape);
                     }
 
                     if (key == Keys.Y)
                     {
                         if (e.Modifiers == Keys.Shift)
-                            Rotate(new(0.0f, -Matrix.DegreesToRadians(1), 0.0f), focusShape);
+                            Rotate(new(0.0f, -Matrix.DegreesToRadians(1), 0.0f), selectedShape);
                         else
-                            Rotate(new(0.0f, Matrix.DegreesToRadians(1), 0.0f), focusShape);
+                            Rotate(new(0.0f, Matrix.DegreesToRadians(1), 0.0f), selectedShape);
                     }
 
                     if (key == Keys.X)
                     {
                         if (e.Modifiers == Keys.Shift)
-                            Rotate(new(-Matrix.DegreesToRadians(1), 0.0f, 0.0f), focusShape);
+                            Rotate(new(-Matrix.DegreesToRadians(1), 0.0f, 0.0f), selectedShape);
                         else
-                            Rotate(new(Matrix.DegreesToRadians(1), 0.0f, 0.0f), focusShape);
+                            Rotate(new(Matrix.DegreesToRadians(1), 0.0f, 0.0f), selectedShape);
                     }
 
                     if (key == Keys.S)
@@ -381,19 +390,19 @@ namespace CG_Cube
                         if (e.Modifiers == Keys.Shift)
                         {
                             scale += 0.1f;
-                            Scale(scale, focusShape);
+                            Scale(scale, selectedShape);
                         }
                         else
                         {
                             scale -= 0.1f;
-                            Scale(scale, focusShape);
+                            Scale(scale, selectedShape);
                         }
                     }
                 }
             }
         }
 
-        private void UpdateCamera(KeyEventArgs e)
+        private void CameraControls(KeyEventArgs e)
         {
             foreach (var keyPair in cameraModifiers)
             {
@@ -437,6 +446,24 @@ namespace CG_Cube
             }
         }
 
+        private void ExtraControls(KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape)
+                Application.Exit();
+
+            if (e.KeyCode == Keys.A && e.Modifiers == Keys.Shift)
+                animatedShape.ToggleAnimation();
+
+            if (e.KeyCode == Keys.C && e.Modifiers == Keys.Shift)
+                Reset();
+
+            if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus)
+                CreateShape_Click(this, e);
+
+            if (e.KeyCode == Keys.Oem3)
+                CycleSelectedShape();
+        }
+
         private void Reset()
         {
             AnimationForward = true;
@@ -454,46 +481,31 @@ namespace CG_Cube
             Invalidate();
         }
 
+        private void CycleSelectedShape()
+        {
+            shapeIndex++;
+            if (shapeIndex >= shapes.Count)
+                shapeIndex = 0;
+
+            selectedShape = shapes.ElementAt(shapeIndex);
+        }
+
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Escape)
-                Application.Exit();
-
-            if (e.KeyCode == Keys.A && e.Modifiers == Keys.Shift)
-                animatedShape.ToggleAnimation();
-
-            if (e.KeyCode == Keys.C && e.Modifiers == Keys.Shift)
-                Reset();
-
-            if (e.KeyCode == Keys.Add || e.KeyCode == Keys.Oemplus)
-                CreateShape_Click(this, e);
-
-            if (e.KeyCode == Keys.D1)
-            {
-                if (e.Modifiers == Keys.Shift)
-                    animatedShape = cube;
-                else
-                    focusShape = cube;
-            }
-
-            if (e.KeyCode == Keys.D2)
-            {
-                if (e.Modifiers == Keys.Shift)
-                    animatedShape = pyramid;
-                else
-                    focusShape = pyramid;
-            }
+            ExtraControls(e);
 
             if (shapeModifiers.ContainsKey(e.KeyCode))
             {
                 shapeModifiers[e.KeyCode] = true;
-                UpdateCube(e);
+                ShapeControls(e);
             }
+
             if (cameraModifiers.ContainsKey(e.KeyCode))
             {
                 cameraModifiers[e.KeyCode] = true;
-                UpdateCamera(e);
+                CameraControls(e);
             }
+
             Invalidate();
         }
 
@@ -502,12 +514,12 @@ namespace CG_Cube
             if (shapeModifiers.ContainsKey(e.KeyCode))
             {
                 shapeModifiers[e.KeyCode] = false;
-                UpdateCube(e);
+                ShapeControls(e);
             }
             if (cameraModifiers.ContainsKey(e.KeyCode))
             {
                 cameraModifiers[e.KeyCode] = false;
-                UpdateCamera(e);
+                CameraControls(e);
             }
         }
 
@@ -520,15 +532,15 @@ namespace CG_Cube
 
         private void CreateShape_Click(object sender, EventArgs e)
         {
-            Tuple<Vector, Vector, float, string, Color, float> shape = new(new(), new(), 1f, string.Empty, Color.Black, 1f);
+            Tuple<Vector, Vector, string, Color, float> shape = new(new(), new(), string.Empty, Color.Black, 1f);
 
             if (InputBox("Create Shape", ref shape) == DialogResult.OK)
             {
-                CreateShape(shape.Item1, shape.Item2, shape.Item3, shape.Item4, shape.Item5, shape.Item6);
+                CreateShape(shape.Item1, shape.Item2, shape.Item3, shape.Item4, shape.Item5);
             }
         }
 
-        private static DialogResult InputBox(string title, ref Tuple<Vector, Vector, float, string, Color, float> shape)
+        private static DialogResult InputBox(string title, ref Tuple<Vector, Vector, string, Color, float> shape)
         {
             #region FormInitialisation
             Form form = new();
@@ -542,7 +554,6 @@ namespace CG_Cube
             Label translationYLabel = new();
             Label translationZLabel = new();
 
-            Label scaleLabel = new();
             Label shapeTypeLabel = new();
             Label colorLabel = new();
             Label sizeLabel = new();
@@ -555,7 +566,6 @@ namespace CG_Cube
             TextBox rotationYBox = new();
             TextBox rotationZBox = new();
 
-            TextBox scaleBox = new();
             TextBox sizeBox = new();
 
             Button buttonOK = new();
@@ -595,7 +605,6 @@ namespace CG_Cube
             rotationYLabel.Text = "Y";
             rotationZLabel.Text = "Z";
 
-            scaleLabel.Text = "Scale";
             colorLabel.Text = "Color";
             sizeLabel.Text = "Size";
 
@@ -662,7 +671,6 @@ namespace CG_Cube
 
             Vector translation = new();
             Vector rotation = new();
-            float scale = 1.0f;
             string shapeType = "cube";
             float size = 1;
             Color c = Color.White;
@@ -674,10 +682,6 @@ namespace CG_Cube
             if (!(ValidNumberInput(rotationXBox.Text) && ValidNumberInput(rotationYBox.Text) && ValidNumberInput(rotationZBox.Text)))
                 return DialogResult.Cancel;
             rotation = new(float.Parse(rotationXBox.Text), float.Parse(rotationYBox.Text), float.Parse(rotationZBox.Text));
-
-            if (!ValidNumberInput(scaleBox.Text))
-                return DialogResult.Cancel;
-            scale = float.Parse(scaleBox.Text);
 
             if (shapeList.SelectedItem is null)
                 return DialogResult.Cancel;
@@ -691,7 +695,7 @@ namespace CG_Cube
                 return DialogResult.Cancel;
             c = colors.Where(col => col.Name == colorList.SelectedItem.ToString()).FirstOrDefault();
 
-            shape = Tuple.Create(translation, rotation, scale, shapeType, c, size);
+            shape = Tuple.Create(translation, rotation, shapeType, c, size);
 
             return dialogResult;
         }
