@@ -285,7 +285,7 @@ namespace CG_Cube
             Font font = new("Arial", 12, FontStyle.Bold);
             NormalizeRotationAngles(shape);
 
-            e.Graphics.DrawString("Scale: " + MathF.Round(scale, 2), font, Brushes.Black, 0, 0);
+            e.Graphics.DrawString("Scale: " + MathF.Round(shape.Enlargement, 2), font, Brushes.Black, 0, 0);
             e.Graphics.DrawString("TransX: " + MathF.Round(shape.Translation.X, 1), font, Brushes.Black, 0, 20);
             e.Graphics.DrawString("TransY: " + MathF.Round(shape.Translation.Y, 1), font, Brushes.Black, 0, 40);
             e.Graphics.DrawString("TransZ: " + MathF.Round(shape.Translation.Z, 1), font, Brushes.Black, 0, 60);
@@ -388,15 +388,9 @@ namespace CG_Cube
                     if (key == Keys.S)
                     {
                         if (e.Modifiers == Keys.Shift)
-                        {
-                            scale += 0.1f;
-                            Scale(scale, selectedShape);
-                        }
+                            selectedShape.Enlargement += 0.1f;
                         else
-                        {
-                            scale -= 0.1f;
-                            Scale(scale, selectedShape);
-                        }
+                            selectedShape.Enlargement -= 0.1f;
                     }
                 }
             }

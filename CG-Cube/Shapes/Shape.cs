@@ -9,8 +9,9 @@ namespace CG_Cube.Shapes
 
         protected readonly float _size;
         protected readonly Color color;
-        protected float prevScale;
+        protected float _scale;
 
+        public float Enlargement { get => _scale; set => this.Scale(value); }
         public Vector Rotation { get; protected set; }
         public Vector Translation { get; protected set; }
         public bool IsAnimating { get; protected set; }
@@ -22,7 +23,7 @@ namespace CG_Cube.Shapes
         {
             _firstMod = false;
             _size = size;
-            prevScale = 1;
+            _scale = 1;
             this.color = color;
             Rotation = new Vector();
             Translation = new Vector();
@@ -101,14 +102,14 @@ namespace CG_Cube.Shapes
         public List<Vector> Scale(float scale)
         {
             Matrix scaleMatrix = Matrix.ScaleMatrix(scale);
-            Matrix prevScaleMatrix = Matrix.ScaleMatrix(1.0f / prevScale);
+            Matrix prevScaleMatrix = Matrix.ScaleMatrix(1.0f / _scale);
             for (int i = 0; i < Projection.Count; i++)
             {
                 VertexBuffer[i] *= prevScaleMatrix * scaleMatrix;
             }
 
             Translate(new());
-            prevScale = scale;
+            _scale = scale;
 
             return Projection;
         }
