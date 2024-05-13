@@ -40,7 +40,7 @@ namespace CG_Cube.Shapes
             }
             else
             {
-                Translation = _startMods.Item1;
+                Translation = _startMods!.Item1;
                 Rotation = _startMods.Item2;
                 Projection = Scale(_startMods.Item3);
             }
