@@ -117,7 +117,7 @@ namespace CG_Cube
         private void CreateShape(Vector translation, Vector rotation, string type, Color color, float size, string name)
         {
             if (shapes.ContainsKey(name))
-                name += shapeDoubleNameIndex.ToString();
+                name += (shapeDoubleNameIndex++).ToString();
 
             if (type.Equals("cube", StringComparison.CurrentCultureIgnoreCase))
             {
