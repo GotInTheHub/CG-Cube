@@ -48,6 +48,7 @@ namespace CG_Cube
         readonly Pyramid pyramid;
         readonly Dodecahedron dodecahedron;
         readonly Dictionary<string, Shape> shapes;
+        private int shapeDoubleNameIndex = 0;
 
         // Tools
         readonly System.Timers.Timer timer = new();
@@ -115,6 +116,9 @@ namespace CG_Cube
 
         private void CreateShape(Vector translation, Vector rotation, string type, Color color, float size, string name)
         {
+            if (shapes.ContainsKey(name))
+                name += shapeDoubleNameIndex.ToString();
+
             if (type.Equals("cube", StringComparison.CurrentCultureIgnoreCase))
             {
                 Cube c = new(color, size);
