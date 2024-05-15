@@ -46,6 +46,7 @@ namespace CG_Cube
         // Objects
         readonly Cube cube;
         readonly Pyramid pyramid;
+        readonly Dodecahedron dodecahedron;
         readonly Dictionary<string, Shape> shapes;
 
         // Tools
@@ -96,13 +97,15 @@ namespace CG_Cube
             // Create objects
             cube = new Cube(Color.Red, 1);
             pyramid = new Pyramid(Color.Green, 1);
+            dodecahedron = new Dodecahedron(Color.Purple, 1);
 
             pyramid.ModelTransformation(new(3, 3, 0), new(5, 5, 5), 1);
 
             shapes = new()
             {
                 { cube.Name.ToLower(), cube },
-                { pyramid.Name.ToLower(), pyramid }
+                { pyramid.Name.ToLower(), pyramid },
+                { dodecahedron.Name.ToLower(), dodecahedron }
             };
 
             // Animated Shape
@@ -122,6 +125,13 @@ namespace CG_Cube
             else if (type.Equals("pyramid", StringComparison.CurrentCultureIgnoreCase))
             {
                 Pyramid c = new(color, size);
+                c.ModelTransformation(translation, rotation, 1f);
+                c.Rename(name);
+                shapes.Add(c.Name, c);
+            }
+            else if (type.Equals("dodecahedron", StringComparison.CurrentCultureIgnoreCase))
+            {
+                Dodecahedron c = new(color, size);
                 c.ModelTransformation(translation, rotation, 1f);
                 c.Rename(name);
                 shapes.Add(c.Name, c);
@@ -205,6 +215,7 @@ namespace CG_Cube
 
         private void RunAnimation(Shape shape)
         {
+            if (shape is null) return;
             if (shape.IsAnimating)
             {
                 if (phase == 1)
@@ -804,7 +815,7 @@ namespace CG_Cube
 
         private static List<string> GetShapeTypes()
         {
-            return ["Cube", "Pyramid"];
+            return ["Cube", "Pyramid", "Dodecahedron"];
         }
 
         private static List<Color> GetAllColors()
