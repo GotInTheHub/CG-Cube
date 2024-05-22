@@ -2,6 +2,7 @@ using CG_Cube.Algebra;
 using CG_Cube.Axes;
 using CG_Cube.Shapes;
 using MatrixTransformations;
+using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Timers;
 
@@ -48,13 +49,14 @@ namespace CG_Cube
         readonly Pyramid pyramid;
         readonly Dodecahedron dodecahedron;
         readonly Dictionary<string, Shape> shapes;
+        readonly ReadOnlyDictionary<string, Shape> shapesCache;
         private int shapeDoubleNameIndex = 0;
 
         // Tools
         readonly System.Timers.Timer timer = new();
 
         // Controls
-        private Dictionary<Keys, bool> shapeModifiers = new()
+        private readonly Dictionary<Keys, bool> shapeModifiers = new()
         {
             { Keys.X, false },
             { Keys.Y, false },
@@ -108,6 +110,7 @@ namespace CG_Cube
                 { pyramid.Name.ToLower(), pyramid },
                 { dodecahedron.Name.ToLower(), dodecahedron }
             };
+            shapesCache = new(shapes.Select(kp => kp).ToDictionary());
 
             // Animated Shape
             animatedShape = cube;
@@ -166,7 +169,7 @@ namespace CG_Cube
 
             if (angleX >= Matrix.DegreesToRadians(45))
                 AnimationForward = false;
-            else if (angleX < 0.0f)
+            else if (angleX + float.Epsilon < 0.0f)
             {
                 phase = 3;
                 AnimationForward = true;
@@ -183,7 +186,7 @@ namespace CG_Cube
             Phi += 1.0f;
             if (angleY >= Matrix.DegreesToRadians(45))
                 AnimationForward = false;
-            else if (angleY < 0.0f)
+            else if (angleY + float.Epsilon < 0.0f)
             {
                 AnimationForward = true;
                 phase = 4;
@@ -199,14 +202,14 @@ namespace CG_Cube
         {
             if (Theta != startTheta)
             {
-                if (Theta < startTheta)
+                if (Theta < startTheta + float.Epsilon)
                     Theta += 1.0f;
                 else
                     Theta -= 1.0f;
             }
             if (Phi != startPhi)
             {
-                if (Phi < startPhi)
+                if (Phi < startPhi + float.Epsilon)
                     Phi += 1.0f;
                 else
                     Phi -= 1.0f;
@@ -275,7 +278,7 @@ namespace CG_Cube
         private static void DrawText(PaintEventArgs e)
         {
             Font font = new("Arial", 12, FontStyle.Bold);
-            int fromEdge = 250;
+            int fromEdge = 300;
 
             e.Graphics.DrawString("s/S", font, Brushes.Black, fromEdge, 0);
             e.Graphics.DrawString("Left/Right", font, Brushes.Black, fromEdge, 20);
@@ -300,23 +303,45 @@ namespace CG_Cube
             Font font = new("Arial", 12, FontStyle.Bold);
             NormalizeRotationAngles(shape);
 
-            e.Graphics.DrawString("Scale: " + MathF.Round(shape.Enlargement, 2), font, Brushes.Black, 0, 0);
-            e.Graphics.DrawString("TransX: " + MathF.Round(shape.Translation.X, 1), font, Brushes.Black, 0, 20);
-            e.Graphics.DrawString("TransY: " + MathF.Round(shape.Translation.Y, 1), font, Brushes.Black, 0, 40);
-            e.Graphics.DrawString("TransZ: " + MathF.Round(shape.Translation.Z, 1), font, Brushes.Black, 0, 60);
-            e.Graphics.DrawString("RotX: " + MathF.Round(Matrix.RadiansToDegrees(angleX), 0), font, Brushes.Black, 0, 80);
-            e.Graphics.DrawString("RotY: " + MathF.Round(Matrix.RadiansToDegrees(angleY), 0), font, Brushes.Black, 0, 100);
-            e.Graphics.DrawString("RotZ: " + MathF.Round(Matrix.RadiansToDegrees(angleZ), 0), font, Brushes.Black, 0, 120);
-            e.Graphics.DrawString("R: " + MathF.Round(R, 1), font, Brushes.Black, 0, 160);
-            e.Graphics.DrawString("D: " + D, font, Brushes.Black, 0, 180);
-            e.Graphics.DrawString("Phi: " + MathF.Round(Phi, 1), font, Brushes.Black, 0, 200);
-            e.Graphics.DrawString("Theta: " + MathF.Round(Theta, 1), font, Brushes.Black, 0, 220);
-            e.Graphics.DrawString("isRotating: " + shape.IsAnimating, font, Brushes.Black, 0, 240);
-            e.Graphics.DrawString("SelectedShape: " + selectedShape.Name, font, Brushes.Black, 0, 260);
-            e.Graphics.DrawString("AnimatedShape: " + animatedShape.Name, font, Brushes.Black, 0, 280);
-            e.Graphics.DrawString("CreateShape", font, Brushes.Black, 0, 300);
-            e.Graphics.DrawString("RemoveShape", font, Brushes.Black, 0, 320);
-            e.Graphics.DrawString("Phase: " + phase, font, Brushes.Black, 0, 340);
+            if (shape != null)
+            {
+                e.Graphics.DrawString("Scale: " + MathF.Round(shape.Enlargement, 2), font, Brushes.Black, 0, 0);
+                e.Graphics.DrawString("TransX: " + MathF.Round(shape.Translation.X, 1), font, Brushes.Black, 0, 20);
+                e.Graphics.DrawString("TransY: " + MathF.Round(shape.Translation.Y, 1), font, Brushes.Black, 0, 40);
+                e.Graphics.DrawString("TransZ: " + MathF.Round(shape.Translation.Z, 1), font, Brushes.Black, 0, 60);
+                e.Graphics.DrawString("RotX: " + MathF.Round(Matrix.RadiansToDegrees(angleX), 0), font, Brushes.Black, 0, 80);
+                e.Graphics.DrawString("RotY: " + MathF.Round(Matrix.RadiansToDegrees(angleY), 0), font, Brushes.Black, 0, 100);
+                e.Graphics.DrawString("RotZ: " + MathF.Round(Matrix.RadiansToDegrees(angleZ), 0), font, Brushes.Black, 0, 120);
+                e.Graphics.DrawString("R: " + MathF.Round(R, 1), font, Brushes.Black, 0, 160);
+                e.Graphics.DrawString("D: " + D, font, Brushes.Black, 0, 180);
+                e.Graphics.DrawString("Phi: " + MathF.Round(Phi, 1), font, Brushes.Black, 0, 200);
+                e.Graphics.DrawString("Theta: " + MathF.Round(Theta, 1), font, Brushes.Black, 0, 220);
+                e.Graphics.DrawString("isRotating: " + shape.IsAnimating, font, Brushes.Black, 0, 240);
+                e.Graphics.DrawString("SelectedShape: " + selectedShape.Name, font, Brushes.Black, 0, 260);
+                e.Graphics.DrawString("AnimatedShape: " + animatedShape.Name, font, Brushes.Black, 0, 280);
+                e.Graphics.DrawString("CreateShape", font, Brushes.Black, 0, 300);
+                e.Graphics.DrawString("RemoveShape", font, Brushes.Black, 0, 320);
+                e.Graphics.DrawString("Phase: " + phase, font, Brushes.Black, 0, 340);
+            }
+            else
+            {
+                e.Graphics.DrawString("Scale: " + 0.0, font, Brushes.Black, 0, 0);
+                e.Graphics.DrawString("TransX: " + 0, font, Brushes.Black, 0, 20);
+                e.Graphics.DrawString("TransY: " + 0, font, Brushes.Black, 0, 40);
+                e.Graphics.DrawString("TransZ: " + 0, font, Brushes.Black, 0, 60);
+                e.Graphics.DrawString("RotX: " + 0, font, Brushes.Black, 0, 80);
+                e.Graphics.DrawString("RotY: " + 0, font, Brushes.Black, 0, 100);
+                e.Graphics.DrawString("RotZ: " + 0, font, Brushes.Black, 0, 120);
+                e.Graphics.DrawString("R: " + MathF.Round(R, 1), font, Brushes.Black, 0, 160);
+                e.Graphics.DrawString("D: " + D, font, Brushes.Black, 0, 180);
+                e.Graphics.DrawString("Phi: " + MathF.Round(Phi, 1), font, Brushes.Black, 0, 200);
+                e.Graphics.DrawString("Theta: " + MathF.Round(Theta, 1), font, Brushes.Black, 0, 220);
+                e.Graphics.DrawString("isRotating: " + false, font, Brushes.Black, 0, 240);
+                e.Graphics.DrawString("SelectedShape: " + string.Empty, font, Brushes.Black, 0, 260);
+                e.Graphics.DrawString("AnimatedShape: " + string.Empty, font, Brushes.Black, 0, 280);
+                e.Graphics.DrawString("CreateShape", font, Brushes.Black, 0, 300);
+                e.Graphics.DrawString("Phase: " + phase, font, Brushes.Black, 0, 320);
+            }
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -342,6 +367,9 @@ namespace CG_Cube
 
         private void NormalizeRotationAngles(Shape shape)
         {
+            if (shape == null)
+                return;
+
             var x = shape.Rotation.X;
             var y = shape.Rotation.Y;
             var z = shape.Rotation.Z;
@@ -352,6 +380,9 @@ namespace CG_Cube
 
         private void ShapeControls(KeyEventArgs e)
         {
+            if (selectedShape == null)
+                return;
+
             foreach (var keyPair in shapeModifiers)
             {
                 Keys key = keyPair.Key;
@@ -462,7 +493,7 @@ namespace CG_Cube
                 Application.Exit();
 
             if (e.KeyCode == Keys.A && e.Modifiers == Keys.Shift)
-                animatedShape.ToggleAnimation();
+                animatedShape?.ToggleAnimation();
 
             if (e.KeyCode == Keys.C && e.Modifiers == Keys.Shift)
                 Reset();
@@ -495,7 +526,16 @@ namespace CG_Cube
             foreach (Shape shape in shapes.Values)
                 shape.Reset();
 
-            shapeModifiers = shapeModifiers.ToDictionary(pair => pair.Key, pair => false);
+            foreach (var kp in shapeModifiers)
+                shapeModifiers[kp.Key] = false;
+
+            shapes.Clear();
+            foreach (var kp in shapesCache)
+                shapes.Add(kp.Key, kp.Value);
+
+            selectedShape = shapes.FirstOrDefault().Value;
+            animatedShape = shapes.FirstOrDefault().Value;
+
             Invalidate();
         }
 
@@ -580,15 +620,21 @@ namespace CG_Cube
         private void RemoveShape(object sender, EventArgs e)
         {
             string shapeName = string.Empty;
-            ShapeRemovalBox(ref shapeName);
-
-            if (!shapes.ContainsKey(shapeName))
+            if (ShapeRemovalBox(ref shapeName) != DialogResult.Cancel && !shapes.ContainsKey(shapeName))
             {
                 MessageBox.Show($"No shape with that name exists");
                 return;
             }
             else
+            {
+                if (selectedShape == shapes[shapeName])
+                    selectedShape = shapes.Select(s => s.Value).Where(s => s != shapes[shapeName]).FirstOrDefault()!;
+
+                if (animatedShape == shapes[shapeName])
+                    animatedShape = shapes.Select(s => s.Value).Where(s => s != shapes[shapeName]).FirstOrDefault()!;
+
                 shapes.Remove(shapeName);
+            }
         }
 
         private static DialogResult ShapeRemovalBox(ref string shapeName)
@@ -633,6 +679,9 @@ namespace CG_Cube
             #endregion
 
             shapeName = shapeNameTextBox.Text.ToLower();
+            if (string.IsNullOrEmpty(shapeName))
+                return DialogResult.Cancel;
+
             return dialogResult;
         }
 
