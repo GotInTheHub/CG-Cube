@@ -204,6 +204,40 @@ namespace CG_Cube_Tests
         }
 
         [Test]
+        public void ScalarMultiplicationrByMatrix()
+        {
+            Matrix matrix = new
+            (
+                1, 2, 3, 4,
+                5, 6, 7, 8,
+                9, 10, 11, 12,
+                13, 14, 15, 16
+            );
+
+            Matrix result = 2 * matrix;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.matrix[0, 0], Is.EqualTo(2));
+                Assert.That(result.matrix[0, 1], Is.EqualTo(4));
+                Assert.That(result.matrix[0, 2], Is.EqualTo(6));
+                Assert.That(result.matrix[0, 3], Is.EqualTo(8));
+                Assert.That(result.matrix[1, 0], Is.EqualTo(10));
+                Assert.That(result.matrix[1, 1], Is.EqualTo(12));
+                Assert.That(result.matrix[1, 2], Is.EqualTo(14));
+                Assert.That(result.matrix[1, 3], Is.EqualTo(16));
+                Assert.That(result.matrix[2, 0], Is.EqualTo(18));
+                Assert.That(result.matrix[2, 1], Is.EqualTo(20));
+                Assert.That(result.matrix[2, 2], Is.EqualTo(22));
+                Assert.That(result.matrix[2, 3], Is.EqualTo(24));
+                Assert.That(result.matrix[3, 0], Is.EqualTo(26));
+                Assert.That(result.matrix[3, 1], Is.EqualTo(28));
+                Assert.That(result.matrix[3, 2], Is.EqualTo(30));
+                Assert.That(result.matrix[3, 3], Is.EqualTo(32));
+            });
+        }
+
+        [Test]
         public void MatrixMultiplicationByVector()
         {
             Matrix matrix = new
