@@ -59,6 +59,20 @@
             return new Vector(b / a.X, b / a.Y, b / a.Z);
         }
 
+        public static bool operator ==(Vector a, Vector b)
+        {
+            return a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.W == b.W;
+        }
+
+        public static bool operator !=(Vector a, Vector b)
+        {
+            return a.X != b.X || a.Y != b.Y || a.Z != b.Z || a.W != b.W;
+        }
+
+        public override bool Equals(object? obj) => obj != null && this == ((Vector)obj);
+
+        public override int GetHashCode() => base.GetHashCode();
+
         public static float Dot(Vector a, Vector b)
         {
             return a.X * b.X + a.Y * b.Y + a.Z * b.Z + a.W * b.W;

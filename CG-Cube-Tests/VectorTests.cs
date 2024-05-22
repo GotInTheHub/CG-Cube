@@ -52,6 +52,20 @@ namespace CG_Cube_Tests
         }
 
         [Test]
+        public void ScalarVectorMultiplication()
+        {
+            var a = new Vector(1, 2, 3);
+            var b = 2;
+            var c = b * a;
+            Assert.Multiple(() =>
+            {
+                Assert.That(c.X, Is.EqualTo(2));
+                Assert.That(c.Y, Is.EqualTo(4));
+                Assert.That(c.Z, Is.EqualTo(6));
+            });
+        }
+
+        [Test]
         public void VectorScalarDivision()
         {
             var a = new Vector(1, 2, 3);
@@ -98,6 +112,7 @@ namespace CG_Cube_Tests
                 Assert.That(b.X, Is.EqualTo(a.X));
                 Assert.That(b.Y, Is.EqualTo(a.Y));
                 Assert.That(b.Z, Is.EqualTo(a.Z));
+                Assert.That(b, Is.EqualTo(a));
             });
         }
 
@@ -115,6 +130,14 @@ namespace CG_Cube_Tests
             var a = new Vector(1, 2, 3);
             var b = a.ToString();
             Assert.That(b, Is.EqualTo("(1, 2, 3, 1)"));
+        }
+
+        [Test]
+        public void VectorWithWToString()
+        {
+            var a = new Vector(1, 2, 3, 0);
+            var b = a.ToString();
+            Assert.That(b, Is.EqualTo("(1, 2, 3, 0)"));
         }
 
         [Test]
