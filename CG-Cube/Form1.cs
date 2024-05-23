@@ -620,7 +620,7 @@ namespace CG_Cube
         private void RemoveShape(object sender, EventArgs e)
         {
             string shapeName = string.Empty;
-            if (ShapeRemovalBox(ref shapeName) != DialogResult.Cancel && !shapes.ContainsKey(shapeName))
+            if (ShapeRemovalBox(ref shapeName) == DialogResult.Cancel || !shapes.ContainsKey(shapeName))
             {
                 MessageBox.Show($"No shape with that name exists");
                 return;

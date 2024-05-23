@@ -57,35 +57,29 @@
 
         public static Matrix operator +(Matrix a, Matrix b)
         {
-            return new Matrix
-            (
-                a.matrix[0, 0] + b.matrix[0, 0], a.matrix[0, 1] + b.matrix[0, 1], a.matrix[0, 2] + b.matrix[0, 2], a.matrix[0, 3] + b.matrix[0, 3],
-                a.matrix[1, 0] + b.matrix[1, 0], a.matrix[1, 1] + b.matrix[1, 1], a.matrix[1, 2] + b.matrix[1, 2], a.matrix[1, 3] + b.matrix[1, 3],
-                a.matrix[2, 0] + b.matrix[2, 0], a.matrix[2, 1] + b.matrix[2, 1], a.matrix[2, 2] + b.matrix[2, 2], a.matrix[2, 3] + b.matrix[2, 3],
-                a.matrix[3, 0] + b.matrix[3, 0], a.matrix[3, 1] + b.matrix[3, 1], a.matrix[3, 2] + b.matrix[3, 2], a.matrix[3, 3] + b.matrix[3, 3]
-            );
+            var mat = new Matrix();
+            for (int i = 0;i<4;i++)
+                for (int j = 0;j<4;j++)
+                    mat.matrix[i,j] = a.matrix[i,j] + b.matrix[i,j];
+            return mat;
         }
 
         public static Matrix operator -(Matrix a, Matrix b)
         {
-            return new Matrix
-            (
-                a.matrix[0, 0] - b.matrix[0, 0], a.matrix[0, 1] - b.matrix[0, 1], a.matrix[0, 2] - b.matrix[0, 2], a.matrix[0, 3] - b.matrix[0, 3],
-                a.matrix[1, 0] - b.matrix[1, 0], a.matrix[1, 1] - b.matrix[1, 1], a.matrix[1, 2] - b.matrix[1, 2], a.matrix[1, 3] - b.matrix[1, 3],
-                a.matrix[2, 0] - b.matrix[2, 0], a.matrix[2, 1] - b.matrix[2, 1], a.matrix[2, 2] - b.matrix[2, 2], a.matrix[2, 3] - b.matrix[2, 3],
-                a.matrix[3, 0] - b.matrix[3, 0], a.matrix[3, 1] - b.matrix[3, 1], a.matrix[3, 2] - b.matrix[3, 2], a.matrix[3, 3] - b.matrix[3, 3]
-            );
+            var mat = new Matrix();
+            for (int i = 0; i < 4; i++)
+                for (int j = 0; j < 4; j++)
+                    mat.matrix[i, j] = a.matrix[i, j] - b.matrix[i, j];
+            return mat;
         }
 
         public static Matrix operator *(Matrix a, float b)
         {
-            return new Matrix
-            (
-                a.matrix[0, 0] * b, a.matrix[0, 1] * b, a.matrix[0, 2] * b, a.matrix[0, 3] * b,
-                a.matrix[1, 0] * b, a.matrix[1, 1] * b, a.matrix[1, 2] * b, a.matrix[1, 3] * b,
-                a.matrix[2, 0] * b, a.matrix[2, 1] * b, a.matrix[2, 2] * b, a.matrix[2, 3] * b,
-                a.matrix[3, 0] * b, a.matrix[3, 1] * b, a.matrix[3, 2] * b, a.matrix[3, 3] * b
-            );
+            var mat = new Matrix();
+            for (int i = 0; i < 4; i++)
+                for (int j = 0; j < 4; j++)
+                    mat.matrix[i, j] = a.matrix[i, j] * b;
+            return mat;
         }
 
         public static Matrix operator *(float a, Matrix b)
